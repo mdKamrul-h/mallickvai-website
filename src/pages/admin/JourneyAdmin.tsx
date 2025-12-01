@@ -170,7 +170,7 @@ const defaultMilestones: Milestone[] = [
   {
     id: '16',
     year: '2023',
-    title: 'he Terminal- Notredamian architects, Engineers and planner junction',
+    title: 'The Terminal- Notredamian architects, Engineers and planner junction',
     description: 'As one of the core members successfully completed The Terminal program with 650 Participants at hotel Radisson. Participants were Ex notredamian Architect, Engineers and planners. This is the first time CNBL got huge media coverage.',
     category: 'leadership',
     image: 'https://images.unsplash.com/photo-1554863838-764b29f1ad1b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsZWFkZXJzaGlwJTIwdGVhbSUyMGNvbGxhYm9yYXRpb258ZW58MXx8fHwxNzY0MzU5MTk0fDA&ixlib=rb-4.1.0&q=80&w=1080',
