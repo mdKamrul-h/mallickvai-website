@@ -255,11 +255,12 @@ export function MilestonesPage() {
         try {
           const data = await getJourneyMilestones();
           if (data && data.length > 0) {
-            // Check if data is outdated (has old title format)
+            // Check if data is outdated by comparing with current defaults
             const firstMilestone = data.find(m => m.id === '1');
-            const isOutdated = firstMilestone && (
-              firstMilestone.title === 'SSC - Secondary School Certificate' ||
-              firstMilestone.title === 'SSC - Khulna Public College'
+            const defaultFirstMilestone = defaultJourneyMilestones.find(m => m.id === '1');
+            const isOutdated = firstMilestone && defaultFirstMilestone && (
+              firstMilestone.title !== defaultFirstMilestone.title ||
+              firstMilestone.description !== defaultFirstMilestone.description
             );
             
             if (isOutdated) {
@@ -289,11 +290,12 @@ export function MilestonesPage() {
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
-          // Check if localStorage data is outdated
+          // Check if localStorage data is outdated by comparing with current defaults
           const firstMilestone = parsed.find((m: JourneyMilestone) => m.id === '1');
-          const isOutdated = firstMilestone && (
-            firstMilestone.title === 'SSC - Secondary School Certificate' ||
-            firstMilestone.title === 'SSC - Khulna Public College'
+          const defaultFirstMilestone = defaultJourneyMilestones.find(m => m.id === '1');
+          const isOutdated = firstMilestone && defaultFirstMilestone && (
+            firstMilestone.title !== defaultFirstMilestone.title ||
+            firstMilestone.description !== defaultFirstMilestone.description
           );
           
           if (isOutdated) {
