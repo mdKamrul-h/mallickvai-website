@@ -5,6 +5,7 @@ import { Badge } from '../components/ui/badge';
 import { Link } from 'react-router-dom';
 import professionalImage from 'figma:asset/6c38df665b9ba66e3ca1a3cf119acaae7dc96636.png';
 import lantaburaLogo from '../assets/1631312325371.jpg';
+import cvPdf from '../assets/cv.pdf';
 import beximcoLogo from 'figma:asset/1312e7585c846834e5cfe9452d0426afa83948dc.png';
 import manvillLogo from 'figma:asset/865327b294aeff036bfd502f824b9d015737561b.png';
 import apexLogo from 'figma:asset/6506a3b045055b0a7d2cf395b4c3cadb70fcbee6.png';
@@ -619,7 +620,17 @@ export function ExperiencePage() {
             Let's connect for speaking opportunities, consulting, or professional networking
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Button className="bg-[#C9A961] hover:bg-[#B89850] text-white">
+            <Button 
+              className="bg-[#C9A961] hover:bg-[#B89850] text-white"
+              onClick={() => {
+                const link = document.createElement('a');
+                link.href = cvPdf;
+                link.download = 'M_M_Nazrul_Islam_CV.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+            >
               <Download className="mr-2 h-4 w-4" />
               Download CV
             </Button>

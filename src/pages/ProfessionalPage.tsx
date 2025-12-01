@@ -13,6 +13,7 @@ import { Badge } from '../components/ui/badge';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import professionalImage from 'figma:asset/6c38df665b9ba66e3ca1a3cf119acaae7dc96636.png';
 import buetLogo from '../assets/6c38df665b9ba66e3ca1a3cf119acaae7dc96636.png';
+import cvPdf from '../assets/cv.pdf';
 
 export function ProfessionalPage() {
   const navigate = useNavigate();
@@ -107,7 +108,17 @@ export function ProfessionalPage() {
                   </p>
 
                   <div className="flex flex-wrap gap-4">
-                    <Button className="bg-[#003366] hover:bg-[#004488]">
+                    <Button 
+                      className="bg-[#003366] hover:bg-[#004488]"
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = cvPdf;
+                        link.download = 'M_M_Nazrul_Islam_CV.pdf';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
+                    >
                       <Download className="mr-2 h-4 w-4" />
                       Download CV
                     </Button>
