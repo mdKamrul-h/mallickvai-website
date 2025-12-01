@@ -255,6 +255,27 @@ export function MilestonesPage() {
         try {
           const data = await getJourneyMilestones();
           if (data && data.length > 0) {
+            // Check if data is outdated (has old title format)
+            const firstMilestone = data.find(m => m.id === '1');
+            const isOutdated = firstMilestone && (
+              firstMilestone.title === 'SSC - Secondary School Certificate' ||
+              firstMilestone.title === 'SSC - Khulna Public College'
+            );
+            
+            if (isOutdated) {
+              console.log('Detected outdated Supabase data, using updated defaults');
+              setJourneyMilestones(defaultJourneyMilestones);
+              // Optionally update Supabase in the background
+              try {
+                const { saveJourneyMilestones } = await import('../lib/supabase-db');
+                await saveJourneyMilestones(defaultJourneyMilestones);
+                console.log('Updated Supabase with new milestone data');
+              } catch (error) {
+                console.warn('Failed to update Supabase:', error);
+              }
+              return;
+            }
+            
             setJourneyMilestones(data);
             return;
           }
@@ -267,11 +288,30 @@ export function MilestonesPage() {
       const stored = localStorage.getItem('journeyMilestones');
       if (stored) {
         try {
-          setJourneyMilestones(JSON.parse(stored));
+          const parsed = JSON.parse(stored);
+          // Check if localStorage data is outdated
+          const firstMilestone = parsed.find((m: JourneyMilestone) => m.id === '1');
+          const isOutdated = firstMilestone && (
+            firstMilestone.title === 'SSC - Secondary School Certificate' ||
+            firstMilestone.title === 'SSC - Khulna Public College'
+          );
+          
+          if (isOutdated) {
+            console.log('Detected outdated localStorage data, using updated defaults');
+            setJourneyMilestones(defaultJourneyMilestones);
+            // Update localStorage
+            localStorage.setItem('journeyMilestones', JSON.stringify(defaultJourneyMilestones));
+            return;
+          }
+          
+          setJourneyMilestones(parsed);
         } catch (error) {
           console.error('Error loading milestones from localStorage:', error);
           setJourneyMilestones(defaultJourneyMilestones);
         }
+      } else {
+        // No saved data, use defaults
+        setJourneyMilestones(defaultJourneyMilestones);
       }
     };
     
