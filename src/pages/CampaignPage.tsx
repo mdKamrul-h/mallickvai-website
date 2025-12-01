@@ -11,8 +11,8 @@ import poster1 from 'figma:asset/023ed9ca4ae374fdbfe5539a4176e568d38262a8.png';
 import poster2 from 'figma:asset/a20a9f3344721801fd72ae2a23f262d55a5a86c2.png';
 import poster3 from 'figma:asset/2b4a91fac962ac8a9b51f704bf34e15e0e0e7b92.png';
 import poster4 from 'figma:asset/0f8ee55b0356fd2a56ce3d828a7505d136d9041b.png';
-import poster5 from 'figma:asset/65417ab2e2a200c249de17f33688132e3f452660.png';
-import poster6 from 'figma:asset/518f38c6ea001661136fa23d3e31e53a30dc8b89.png';
+import poster5 from '../assets/poster1.jpeg';
+import poster6 from '../assets/poster2.jpeg';
 
 interface CampaignPageProps {
   isModal?: boolean;
