@@ -255,13 +255,26 @@ export function MilestonesPage() {
         try {
           const data = await getJourneyMilestones();
           if (data && data.length > 0) {
-            // Check if data is outdated by comparing with current defaults
+            // Check if data is outdated by comparing multiple milestones with current defaults
+            // Check milestone #1, #16 (Terminal), and total count
             const firstMilestone = data.find(m => m.id === '1');
+            const terminalMilestone = data.find(m => m.id === '16');
             const defaultFirstMilestone = defaultJourneyMilestones.find(m => m.id === '1');
-            const isOutdated = firstMilestone && defaultFirstMilestone && (
-              firstMilestone.title !== defaultFirstMilestone.title ||
-              firstMilestone.description !== defaultFirstMilestone.description
-            );
+            const defaultTerminalMilestone = defaultJourneyMilestones.find(m => m.id === '16');
+            
+            const isOutdated = 
+              // Check if count differs
+              data.length !== defaultJourneyMilestones.length ||
+              // Check milestone #1
+              (firstMilestone && defaultFirstMilestone && (
+                firstMilestone.title !== defaultFirstMilestone.title ||
+                firstMilestone.description !== defaultFirstMilestone.description
+              )) ||
+              // Check milestone #16 (Terminal) - commonly updated
+              (terminalMilestone && defaultTerminalMilestone && (
+                terminalMilestone.title !== defaultTerminalMilestone.title ||
+                terminalMilestone.description !== defaultTerminalMilestone.description
+              ));
             
             if (isOutdated) {
               console.log('Detected outdated Supabase data, using updated defaults');
@@ -290,13 +303,26 @@ export function MilestonesPage() {
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
-          // Check if localStorage data is outdated by comparing with current defaults
+          // Check if localStorage data is outdated by comparing multiple milestones with current defaults
+          // Check milestone #1, #16 (Terminal), and total count
           const firstMilestone = parsed.find((m: JourneyMilestone) => m.id === '1');
+          const terminalMilestone = parsed.find((m: JourneyMilestone) => m.id === '16');
           const defaultFirstMilestone = defaultJourneyMilestones.find(m => m.id === '1');
-          const isOutdated = firstMilestone && defaultFirstMilestone && (
-            firstMilestone.title !== defaultFirstMilestone.title ||
-            firstMilestone.description !== defaultFirstMilestone.description
-          );
+          const defaultTerminalMilestone = defaultJourneyMilestones.find(m => m.id === '16');
+          
+          const isOutdated = 
+            // Check if count differs
+            parsed.length !== defaultJourneyMilestones.length ||
+            // Check milestone #1
+            (firstMilestone && defaultFirstMilestone && (
+              firstMilestone.title !== defaultFirstMilestone.title ||
+              firstMilestone.description !== defaultFirstMilestone.description
+            )) ||
+            // Check milestone #16 (Terminal) - commonly updated
+            (terminalMilestone && defaultTerminalMilestone && (
+              terminalMilestone.title !== defaultTerminalMilestone.title ||
+              terminalMilestone.description !== defaultTerminalMilestone.description
+            ));
           
           if (isOutdated) {
             console.log('Detected outdated localStorage data, using updated defaults');
