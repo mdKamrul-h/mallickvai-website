@@ -4,7 +4,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Link } from 'react-router-dom';
 import professionalImage from 'figma:asset/6c38df665b9ba66e3ca1a3cf119acaae7dc96636.png';
-import lantaburaLogo from 'figma:asset/7baee6093eb8abe46bd88e5b4e67ee8e5097a69b.png';
+import lantaburaLogo from '../assets/1631312325371.jpg';
 import beximcoLogo from 'figma:asset/1312e7585c846834e5cfe9452d0426afa83948dc.png';
 import manvillLogo from 'figma:asset/865327b294aeff036bfd502f824b9d015737561b.png';
 import apexLogo from 'figma:asset/6506a3b045055b0a7d2cf395b4c3cadb70fcbee6.png';

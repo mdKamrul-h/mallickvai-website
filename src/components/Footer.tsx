@@ -105,7 +105,7 @@ export function Footer() {
             </h3>
             <div className="space-y-4 mb-6">
               <a
-                href="https://bd.linkedin.com/in/m-m-nazrul-islam-41992a30"
+                href="https://www.linkedin.com/in/m-m-nazrul-islam-41992a30/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 text-gray-300 hover:text-[#C9A961] transition-colors duration-300"
