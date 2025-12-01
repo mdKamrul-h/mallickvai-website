@@ -92,14 +92,15 @@ export function AdminGallery() {
         imageUrl = await uploadImage(selectedFile, STORAGE_BUCKETS.GALLERY, 'gallery');
       }
       
+      const tagsInput = (formData.get('tags') as string) || '';
       const imageData: GalleryImage = {
         id: editingImage?.id || Date.now().toString(),
         title: formData.get('title') as string,
-        description: formData.get('description') as string,
+        description: (formData.get('description') as string) || '',
         imageUrl: imageUrl,
         category: formData.get('category') as string,
-        tags: (formData.get('tags') as string).split(',').map(t => t.trim()),
-        date: formData.get('date') as string,
+        tags: tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [],
+        date: (formData.get('date') as string) || '',
         featured: formData.get('featured') === 'on',
       };
 
@@ -278,23 +279,29 @@ export function AdminGallery() {
                     <label className="block text-sm font-['Inter'] font-medium text-gray-700 mb-2">
                       Category *
                     </label>
-                    <input
-                      type="text"
+                    <select
                       name="category"
                       required
-                      defaultValue={editingImage?.category}
+                      defaultValue={editingImage?.category || ''}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg font-['Inter'] focus:outline-none focus:ring-2 focus:ring-[#C9A961]"
-                    />
+                    >
+                      <option value="">Select Category</option>
+                      <option value="Community">Community</option>
+                      <option value="Professional">Professional</option>
+                      <option value="Events">Events</option>
+                      <option value="Awards">Awards</option>
+                      <option value="Leadership">Leadership</option>
+                      <option value="Other">Other</option>
+                    </select>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-['Inter'] font-medium text-gray-700 mb-2">
-                    Description *
+                    Description
                   </label>
                   <textarea
                     name="description"
-                    required
                     rows={3}
                     defaultValue={editingImage?.description}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg font-['Inter'] focus:outline-none focus:ring-2 focus:ring-[#C9A961]"
@@ -379,25 +386,23 @@ export function AdminGallery() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-['Inter'] font-medium text-gray-700 mb-2">
-                      Date *
+                      Date
                     </label>
                     <input
                       type="date"
                       name="date"
-                      required
                       defaultValue={editingImage?.date}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg font-['Inter'] focus:outline-none focus:ring-2 focus:ring-[#C9A961]"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-['Inter'] font-medium text-gray-700 mb-2">
-                      Tags (comma separated) *
+                      Tags (comma separated)
                     </label>
                     <input
                       type="text"
                       name="tags"
-                      required
-                      defaultValue={editingImage?.tags.join(', ')}
+                      defaultValue={editingImage?.tags?.join(', ') || ''}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg font-['Inter'] focus:outline-none focus:ring-2 focus:ring-[#C9A961]"
                     />
                   </div>
