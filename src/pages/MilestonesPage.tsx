@@ -10,7 +10,7 @@ const defaultJourneyMilestones = [
   {
     id: '1',
     year: '1997',
-    title: 'SSC - Khulna Public College',
+    title: 'SSC from Khulna Public College',
     description: 'Completed SSC (Secondary School Certificate) from Khulna Public College. The foundational academic achievement that marked the beginning of an extraordinary journey.',
     category: 'education',
     image: 'https://images.unsplash.com/photo-1686213011698-8e70cb7ed011?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxncmFkdWF0aW9uJTIwY2VyZW1vbnklMjBzdHVkZW50c3xlbnwxfHx8fDE3NjQzMjk4NTF8MA&ixlib=rb-4.1.0&q=80&w=1080',
@@ -20,7 +20,7 @@ const defaultJourneyMilestones = [
   {
     id: '2',
     year: '1999',
-    title: 'HSC - Notre Dame College',
+    title: 'HSC from Notre Dame College',
     description: 'Graduated from Notre Dame College with HSC. Actively involved in different clubs, building leadership skills and creating lifelong bonds with the NDC community.',
     category: 'education',
     image: 'https://images.unsplash.com/photo-1695204906099-8d6394c2752f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbmdpbmVlcmluZyUyMGNvbGxlZ2UlMjBjYW1wdXN8ZW58MXx8fHwxNzY0MzU5MTkyfDA&ixlib=rb-4.1.0&q=80&w=1080',
@@ -30,7 +30,7 @@ const defaultJourneyMilestones = [
   {
     id: '3',
     year: '2005',
-    title: 'B.Sc in Engineering (IPE) - BUET',
+    title: 'B.Sc Engineering (IPE) from BUET',
     description: 'Earned Bachelor of Science in Engineering (IPE) from Bangladesh University of Engineering and Technology (BUET), one of the most prestigious institutions in the country.',
     category: 'education',
     image: 'https://images.unsplash.com/photo-1695204906099-8d6394c2752f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxlbmdpbmVlcmluZyUyMGNvbGxlZ2UlMjBjYW1wdXN8ZW58MXx8fHwxNzY0MzU5MTkyfDA&ixlib=rb-4.1.0&q=80&w=1080',
@@ -40,7 +40,7 @@ const defaultJourneyMilestones = [
   {
     id: '4',
     year: '2004-2005',
-    title: 'Finance Secretary - AIPE, BUET',
+    title: 'Finance Secretary of AIPE, BUET',
     description: 'Served as Finance Secretary of the Association of Industrial and Production Engineering (AIPE) at BUET, demonstrating early leadership and organizational skills.',
     category: 'leadership',
     image: 'https://images.unsplash.com/photo-1554863838-764b29f1ad1b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsZWFkZXJzaGlwJTIwdGVhbSUyMGNvbGxhYm9yYXRpb258ZW58MXx8fHwxNzY0MzU5MTk0fDA&ixlib=rb-4.1.0&q=80&w=1080',
@@ -80,7 +80,7 @@ const defaultJourneyMilestones = [
   {
     id: '8',
     year: '2013-2022',
-    title: 'Partner - Manvill Styles Ltd',
+    title: 'Partner at Manvill Styles Ltd',
     description: 'Served as Partner at Manvill Styles Ltd, building a successful garment manufacturing enterprise and establishing strong business foundations.',
     category: 'business',
     image: 'https://images.unsplash.com/photo-1543132220-7bc04a0e790a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxleGVjdXRpdmUlMjBidXNpbmVzcyUyMHBvcnRyYWl0fGVufDF8fHx8MTc2NDI5MDg0N3ww&ixlib=rb-4.1.0&q=80&w=1080',
@@ -90,7 +90,7 @@ const defaultJourneyMilestones = [
   {
     id: '9',
     year: '2017',
-    title: 'Started Retail Business - Pink and Blue',
+    title: 'Started retail business "Pink and Blue"',
     description: 'Launched retail business venture with brand "Pink and Blue", diversifying into retail sector and creating a continuing successful brand presence.',
     category: 'business',
     image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxyZXRhaWwlMjBzdG9yZSUyMGJ1c2luZXNzfGVufDF8fHx8MTc2NDM1OTE5NHww&ixlib=rb-4.1.0&q=80&w=1080',
@@ -101,7 +101,7 @@ const defaultJourneyMilestones = [
     id: '10',
     year: '2023-2024',
     title: 'Served Beximco Group',
-    description: 'Served Beximco Group managing one unit with 4000+ manpower and achieving yearly turnover of 45 million USD, demonstrating large-scale operational excellence.',
+    description: 'Served Beximco Group managing one unit with 4000+ manpower and achieving yearly turnover of $45M, demonstrating large-scale operational excellence.',
     category: 'career',
     image: 'https://images.unsplash.com/photo-1758630737900-a28682c5aa69?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMG9mZmljZSUyMG1vZGVybnxlbnwxfHx8fDE3NjQyNDMxODN8MA&ixlib=rb-4.1.0&q=80&w=1080',
     image2: 'https://images.unsplash.com/photo-1700156316467-7b78b47c2c9c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxpbmR1c3RyaWFsJTIwYnVpbGRpbmclMjBtb2Rlcm58ZW58MXx8fHwxNzY0NDkyMDI4fDA&ixlib=rb-4.1.0&q=80&w=1080',
@@ -111,7 +111,7 @@ const defaultJourneyMilestones = [
     id: '11',
     year: '2024-2025',
     title: 'Serving Lantabur Group',
-    description: 'Currently serving Lantabur Group with 10,000+ manpower, managing yearly business of 130 million USD, leading operations at unprecedented scale.',
+    description: 'Currently serving Lantabur Group with 10,000+ manpower, managing yearly business of $130M, leading operations at unprecedented scale.',
     category: 'career',
     image: 'https://images.unsplash.com/photo-1758630737900-a28682c5aa69?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxidXNpbmVzcyUyMG9mZmljZSUyMG1vZGVybnxlbnwxfHx8fDE3NjQyNDMxODN8MA&ixlib=rb-4.1.0&q=80&w=1080',
     image2: 'https://images.unsplash.com/photo-1580795478966-561ba4f1ce68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvcGVyYXRpb25zJTIwbWFuYWdlbWVudCUyMHRlYW18ZW58MXx8fHwxNzY0NDkyMDMwfDA&ixlib=rb-4.1.0&q=80&w=1080',
@@ -120,7 +120,7 @@ const defaultJourneyMilestones = [
   {
     id: '12',
     year: '2018',
-    title: 'NDC99 - The Notredamian Organization Founder',
+    title: 'Founded NDC99 - The Notredamian organization',
     description: 'Founded NDC99 - The Notredamian organization with Facebook and WhatsApp groups, creating platforms for batch members to connect and strengthen community bonds.',
     category: 'community',
     image: 'https://images.unsplash.com/photo-1757143137392-0b1e1a27a7de?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhbHVtbmklMjByZXVuaW9uJTIwY29sbGVnZXxlbnwxfHx8fDE3NjQzNTkxOTQ8MA&ixlib=rb-4.1.0&q=80&w=1080',

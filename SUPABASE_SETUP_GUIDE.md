@@ -7,11 +7,14 @@ This guide will walk you through setting up Supabase for image uploads and hosti
 ## 📋 Table of Contents
 
 1. [Setting Up Supabase](#setting-up-supabase)
-2. [Configuring Storage Buckets](#configuring-storage-buckets)
-3. [Setting Up Environment Variables](#setting-up-environment-variables)
-4. [Testing the Integration](#testing-the-integration)
-5. [Free Hosting Options](#free-hosting-options)
-6. [Troubleshooting](#troubleshooting)
+2. [Setting Up Database Tables](#setting-up-database-tables)
+3. [Configuring Storage Buckets](#configuring-storage-buckets)
+4. [Setting Up Environment Variables](#setting-up-environment-variables)
+5. [Testing the Integration](#testing-the-integration)
+6. [Free Hosting Options](#free-hosting-options)
+7. [Adding Your Custom Domain](#adding-your-custom-domain)
+8. [Troubleshooting](#troubleshooting)
+9. [Setting Up Admin Authentication](#setting-up-admin-authentication)
 
 ---
 
@@ -306,7 +309,149 @@ Here are the best free hosting options for your React application:
 
 ---
 
-## 7. Troubleshooting
+## 7. Adding Your Custom Domain
+
+Once your site is deployed, you can add your own custom domain (e.g., `yourname.com` instead of `your-project.vercel.app`).
+
+### Option 1: Adding Custom Domain on Vercel
+
+**Prerequisites:**
+- You need to own a domain (purchase from providers like Namecheap, GoDaddy, Google Domains, etc.)
+- Your site must be deployed on Vercel
+
+**Setup Steps:**
+
+1. **Get Your Domain Ready**
+   - Purchase a domain from a registrar (if you don't have one)
+   - You'll need access to your domain's DNS settings
+
+2. **Add Domain in Vercel**
+   - Go to your Vercel dashboard
+   - Select your project
+   - Go to **Settings** → **Domains**
+   - Click **"Add Domain"**
+   - Enter your domain (e.g., `yourname.com` or `www.yourname.com`)
+   - Click **"Add"**
+
+3. **Configure DNS Records**
+   - Vercel will show you the DNS records you need to add
+   - You'll typically need to add one of these:
+     - **A Record**: Point to Vercel's IP addresses
+     - **CNAME Record**: Point to `cname.vercel-dns.com`
+   - Go to your domain registrar's DNS settings
+   - Add the DNS record(s) as shown in Vercel
+   - Wait 5-60 minutes for DNS propagation
+
+4. **Verify Domain**
+   - Vercel will automatically verify your domain once DNS propagates
+   - You'll see a green checkmark when it's ready
+   - Your site will now be accessible at your custom domain!
+
+**For Subdomains (e.g., `www.yourname.com`):**
+- Add both the root domain (`yourname.com`) and subdomain (`www.yourname.com`)
+- Vercel will automatically redirect one to the other
+
+### Option 2: Adding Custom Domain on Netlify
+
+**Setup Steps:**
+
+1. **Add Domain in Netlify**
+   - Go to your Netlify dashboard
+   - Select your site
+   - Go to **Site configuration** → **Domain management**
+   - Click **"Add custom domain"**
+   - Enter your domain (e.g., `yourname.com`)
+   - Click **"Verify"**
+
+2. **Configure DNS Records**
+   - Netlify will show you the DNS records needed
+   - You'll need to add:
+     - **A Record**: Point to Netlify's IP addresses (shown in dashboard)
+     - **CNAME Record**: For `www` subdomain, point to your Netlify site URL
+   - Go to your domain registrar's DNS settings
+   - Add the DNS records as shown
+   - Wait for DNS propagation (5-60 minutes)
+
+3. **Enable HTTPS**
+   - Netlify automatically provisions SSL certificates via Let's Encrypt
+   - Once DNS propagates, HTTPS will be enabled automatically
+   - Your site will be accessible at `https://yourname.com`
+
+### Option 3: Adding Custom Domain on GitHub Pages
+
+**Setup Steps:**
+
+1. **Configure Repository Settings**
+   - Go to your GitHub repository
+   - Click **Settings** → **Pages**
+   - Under **Custom domain**, enter your domain (e.g., `yourname.com`)
+   - Check **"Enforce HTTPS"** (recommended)
+
+2. **Add DNS Records**
+   - You need to add DNS records at your domain registrar:
+     - **A Records**: Point to GitHub Pages IPs:
+       - `185.199.108.153`
+       - `185.199.109.153`
+       - `185.199.110.153`
+       - `185.199.111.153`
+     - **CNAME Record**: For `www` subdomain, point to `yourusername.github.io`
+
+3. **Create CNAME File** (if using custom domain)
+   - In your repository root, create a file named `CNAME` (no extension)
+   - Add your domain name inside: `yourname.com`
+   - Commit and push the file
+
+4. **Wait for DNS Propagation**
+   - DNS changes can take 5-60 minutes to propagate
+   - GitHub will verify your domain automatically
+   - Once verified, your site will be accessible at your custom domain
+
+### DNS Configuration Tips
+
+**Common DNS Record Types:**
+- **A Record**: Points a domain to an IP address
+- **CNAME Record**: Points a domain to another domain name
+- **TXT Record**: Used for domain verification (some platforms require this)
+
+**DNS Propagation:**
+- Changes can take 5 minutes to 48 hours (usually 5-60 minutes)
+- Use tools like [whatsmydns.net](https://www.whatsmydns.net) to check propagation status
+- Clear your browser cache if the site doesn't load immediately
+
+**SSL/HTTPS:**
+- Vercel and Netlify automatically provide free SSL certificates
+- GitHub Pages provides SSL when you enable "Enforce HTTPS"
+- All platforms use Let's Encrypt for free SSL certificates
+
+### Troubleshooting Custom Domains
+
+**Problem: Domain Not Resolving**
+
+**Solutions:**
+- Wait longer for DNS propagation (can take up to 48 hours)
+- Verify DNS records are correct at your registrar
+- Use DNS checker tools to verify records are propagated globally
+- Clear your browser cache and try again
+
+**Problem: SSL Certificate Not Issued**
+
+**Solutions:**
+- Ensure DNS records are correctly configured
+- Wait for DNS to fully propagate before SSL can be issued
+- On Vercel/Netlify, SSL is automatic once DNS is correct
+- On GitHub Pages, enable "Enforce HTTPS" in repository settings
+
+**Problem: Site Shows "Not Secure" Warning**
+
+**Solutions:**
+- Ensure HTTPS is enabled in your hosting platform
+- Wait for SSL certificate to be issued (usually automatic)
+- Check that all DNS records are correct
+- Clear browser cache and try again
+
+---
+
+## 8. Troubleshooting
 
 ### Problem: "Supabase is not configured" Error
 
@@ -345,6 +490,79 @@ Here are the best free hosting options for your React application:
 - Check build command is `npm run build`
 - Verify output directory is `build`
 - Check build logs for specific errors
+
+### Problem: Site Shows 404 Error or "Page Not Found" on Vercel
+
+**This is the most common issue with React Router SPAs!**
+
+**Solution:**
+You need to add a `vercel.json` file to handle client-side routing:
+
+1. **Create `vercel.json` in your project root:**
+   ```json
+   {
+     "rewrites": [
+       {
+         "source": "/(.*)",
+         "destination": "/index.html"
+       }
+     ]
+   }
+   ```
+
+2. **Commit and push to GitHub:**
+   ```bash
+   git add vercel.json
+   git commit -m "Add vercel.json for SPA routing"
+   git push
+   ```
+
+3. **Vercel will automatically redeploy** - your routes should now work!
+
+**Why this is needed:**
+- React Router handles routing in the browser (client-side)
+- When you visit `/admin` directly, Vercel looks for a file at that path
+- The rewrite rule tells Vercel to serve `index.html` for all routes
+- React Router then handles the routing in the browser
+
+### Problem: Site Shows Blank Page on Vercel
+
+**Solutions:**
+- Check browser console for errors (F12 → Console tab)
+- Verify environment variables are set in Vercel:
+  - Go to Vercel Dashboard → Your Project → Settings → Environment Variables
+  - Ensure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are set
+  - Redeploy after adding environment variables
+- Check Vercel build logs for errors:
+  - Go to Vercel Dashboard → Your Project → Deployments
+  - Click on the latest deployment
+  - Check the build logs for any errors
+- Verify the build output directory is correct:
+  - In Vercel project settings, ensure Output Directory is set to `build`
+
+### Problem: Cannot Access Admin Panel After Deployment
+
+**Solutions:**
+- Verify you're using the correct login credentials
+- Check that Supabase authentication is working:
+  - Try logging in at `/login` on your deployed site
+  - Check browser console for authentication errors
+- Ensure environment variables are set correctly in Vercel
+- Clear browser cache and cookies, then try again
+- Check that the Supabase project is active (not paused)
+
+### Problem: Environment Variables Not Working on Vercel
+
+**Solutions:**
+- Go to Vercel Dashboard → Your Project → Settings → Environment Variables
+- Add both variables:
+  - `VITE_SUPABASE_URL` = your Supabase project URL
+  - `VITE_SUPABASE_ANON_KEY` = your Supabase anon key
+- **Important**: After adding/updating environment variables, you MUST redeploy:
+  - Go to Deployments tab
+  - Click the three dots (⋯) on the latest deployment
+  - Click "Redeploy"
+- Verify variable names are exactly: `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (case-sensitive)
 
 ### Problem: localStorage Quota Exceeded (Old Issue)
 
@@ -398,7 +616,7 @@ Your application now:
 
 ---
 
-## 8. Setting Up Admin Authentication
+## 9. Setting Up Admin Authentication
 
 To secure your admin panel, you need to set up authentication in Supabase and create an admin user.
 
