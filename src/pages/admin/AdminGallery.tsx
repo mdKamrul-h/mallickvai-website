@@ -9,15 +9,20 @@ import { CMSGuide } from '../../components/admin/CMSGuide';
 import { uploadImage, deleteImage, STORAGE_BUCKETS, isSupabaseUrl } from '../../lib/supabase';
 import * as supabaseDb from '../../lib/supabase-db';
 
-// Gallery Manager with Mobile Image Upload Support - v2.0
+// Gallery Manager with Mobile Image Upload Support - v3.0
 export function AdminGallery() {
   const { galleryImages, addGalleryImage, updateGalleryImage, deleteGalleryImage } = useContent();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [editingImage, setEditingImage] = useState<GalleryImage | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [bulkFiles, setBulkFiles] = useState<File[]>([]);
+  const [bulkPreviews, setBulkPreviews] = useState<string[]>([]);
+  const [bulkCategory, setBulkCategory] = useState('');
+  const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
   const [isUploading, setIsUploading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -57,9 +62,107 @@ export function AdminGallery() {
     }
   };
 
+  const handleBulkFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    
+    // Validate files
+    const validFiles = files.filter(file => {
+      if (!file.type.startsWith('image/')) {
+        alert(`${file.name} is not an image file`);
+        return false;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`${file.name} is larger than 5MB`);
+        return false;
+      }
+      return true;
+    });
+    
+    setBulkFiles(prev => [...prev, ...validFiles]);
+    
+    // Create previews
+    validFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBulkPreviews(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleRemoveFile = () => {
     setSelectedFile(null);
     setPreviewUrl('');
+  };
+
+  const handleRemoveBulkFile = (index: number) => {
+    setBulkFiles(prev => prev.filter((_, i) => i !== index));
+    setBulkPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleBulkUpload = async () => {
+    if (bulkFiles.length === 0) {
+      alert('Please select at least one image');
+      return;
+    }
+    
+    if (!bulkCategory) {
+      alert('Please select a category');
+      return;
+    }
+
+    setIsUploading(true);
+    setBulkProgress({ current: 0, total: bulkFiles.length });
+
+    try {
+      const uploadPromises = bulkFiles.map(async (file, index) => {
+        try {
+          // Upload image to Supabase
+          const imageUrl = await uploadImage(file, STORAGE_BUCKETS.GALLERY, 'gallery');
+          
+          // Create gallery image data
+          const imageData: GalleryImage = {
+            id: Date.now().toString() + index,
+            title: file.name.replace(/\.[^/.]+$/, ''), // Use filename without extension as title
+            description: '',
+            imageUrl: imageUrl,
+            category: bulkCategory,
+            tags: [],
+            date: '',
+            featured: false,
+          };
+
+          // Save to Supabase
+          await supabaseDb.createGalleryImage(imageData);
+          addGalleryImage(imageData);
+          
+          setBulkProgress(prev => ({ ...prev, current: prev.current + 1 }));
+        } catch (error) {
+          console.error(`Error uploading ${file.name}:`, error);
+          throw error;
+        }
+      });
+
+      await Promise.all(uploadPromises);
+
+      // Reset bulk upload state
+      setBulkFiles([]);
+      setBulkPreviews([]);
+      setBulkCategory('');
+      setShowBulkUpload(false);
+      setHasUnsavedChanges(true);
+      setSaveSuccess(true);
+      setTimeout(() => {
+        setSaveSuccess(false);
+        setHasUnsavedChanges(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Error uploading images:', error);
+      alert('Failed to upload some images. Please check your Supabase configuration and try again.');
+    } finally {
+      setIsUploading(false);
+      setBulkProgress({ current: 0, total: 0 });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -206,25 +309,40 @@ export function AdminGallery() {
                 )}
               </div>
             )}
-            <Button
-              onClick={() => {
-                setEditingImage(null);
-                setShowForm(true);
-              }}
-              className="font-['Inter']"
-              style={{ background: 'linear-gradient(135deg, #C9A961 0%, #B76E79 100%)' }}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Image
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => {
+                  setEditingImage(null);
+                  setShowForm(true);
+                  setShowBulkUpload(false);
+                }}
+                variant="outline"
+                className="font-['Inter']"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Single
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowBulkUpload(true);
+                  setShowForm(false);
+                  setEditingImage(null);
+                }}
+                className="font-['Inter']"
+                style={{ background: 'linear-gradient(135deg, #C9A961 0%, #B76E79 100%)' }}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Bulk Upload
+              </Button>
+            </div>
           </div>
         </div>
 
         {/* CMS Guide */}
-        {showForm && <CMSGuide />}
+        {(showForm || showBulkUpload) && <CMSGuide />}
 
         {/* Filters */}
-        {!showForm && (
+        {!showForm && !showBulkUpload && (
           <Card>
             <CardContent className="p-6">
               <div className="flex flex-col md:flex-row gap-4">
@@ -356,7 +474,6 @@ export function AdminGallery() {
                       type="file"
                       id="image-upload"
                       accept="image/*"
-                      capture="environment"
                       onChange={handleFileChange}
                       className="hidden"
                     />
@@ -453,8 +570,160 @@ export function AdminGallery() {
           </Card>
         )}
 
+        {/* Bulk Upload Form */}
+        {showBulkUpload && (
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-[#0A1929] mb-6">Bulk Upload Images</h3>
+              
+              {/* Category Selection */}
+              <div className="mb-6">
+                <label className="block text-sm font-['Inter'] font-medium text-gray-700 mb-2">
+                  Category *
+                </label>
+                <select
+                  value={bulkCategory}
+                  onChange={(e) => setBulkCategory(e.target.value)}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg font-['Inter'] focus:outline-none focus:ring-2 focus:ring-[#C9A961]"
+                >
+                  <option value="">Select Category</option>
+                  <option value="Community">Community</option>
+                  <option value="Professional">Professional</option>
+                  <option value="Events">Events</option>
+                  <option value="Awards">Awards</option>
+                  <option value="Leadership">Leadership</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              {/* File Upload Input */}
+              <div className="mb-6">
+                <div className="relative">
+                  <input
+                    type="file"
+                    id="bulk-image-upload"
+                    accept="image/*"
+                    multiple
+                    onChange={handleBulkFileChange}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="bulk-image-upload"
+                    className="flex items-center justify-center gap-3 w-full px-6 py-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#C9A961] hover:bg-gray-50 transition-all"
+                  >
+                    <Upload className="w-5 h-5 text-gray-400" />
+                    <div className="text-center">
+                      <p className="font-['Inter'] font-medium text-gray-700">
+                        Select Multiple Images from Gallery
+                      </p>
+                      <p className="text-xs text-gray-500 font-['Inter'] mt-1">
+                        Click to choose multiple images from gallery • Max 5MB per image
+                      </p>
+                    </div>
+                  </label>
+                </div>
+                
+                {bulkFiles.length > 0 && (
+                  <p className="text-sm text-gray-600 font-['Inter'] mt-2">
+                    {bulkFiles.length} image{bulkFiles.length !== 1 ? 's' : ''} selected
+                  </p>
+                )}
+              </div>
+
+              {/* Preview Grid */}
+              {bulkPreviews.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="text-sm font-['Inter'] font-medium text-gray-700 mb-3">
+                    Selected Images ({bulkPreviews.length})
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {bulkPreviews.map((preview, index) => (
+                      <div key={index} className="relative group">
+                        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                          <img
+                            src={preview}
+                            alt={`Preview ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveBulkFile(index)}
+                          className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                        <p className="text-xs text-gray-600 font-['Inter'] mt-1 truncate">
+                          {bulkFiles[index]?.name}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Progress Indicator */}
+              {isUploading && bulkProgress.total > 0 && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-['Inter'] text-gray-700">
+                      Uploading images...
+                    </span>
+                    <span className="text-sm font-['Inter'] text-gray-600">
+                      {bulkProgress.current} / {bulkProgress.total}
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-[#C9A961] h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${(bulkProgress.current / bulkProgress.total) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-4">
+                <Button
+                  onClick={handleBulkUpload}
+                  disabled={isUploading || bulkFiles.length === 0 || !bulkCategory}
+                  className="font-['Inter']"
+                  style={{ background: 'linear-gradient(135deg, #C9A961 0%, #B76E79 100%)' }}
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Uploading {bulkProgress.current}/{bulkProgress.total}...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload {bulkFiles.length} Image{bulkFiles.length !== 1 ? 's' : ''}
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowBulkUpload(false);
+                    setBulkFiles([]);
+                    setBulkPreviews([]);
+                    setBulkCategory('');
+                  }}
+                  disabled={isUploading}
+                  className="font-['Inter']"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Gallery Grid */}
-        {!showForm && (
+        {!showForm && !showBulkUpload && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredImages.map((image) => (
               <Card key={image.id} className="overflow-hidden">
@@ -509,7 +778,7 @@ export function AdminGallery() {
           </div>
         )}
 
-        {!showForm && filteredImages.length === 0 && (
+        {!showForm && !showBulkUpload && filteredImages.length === 0 && (
           <Card>
             <CardContent className="p-12 text-center">
               <p className="text-gray-500 font-['Inter']">No images found</p>
