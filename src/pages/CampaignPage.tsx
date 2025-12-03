@@ -13,7 +13,7 @@ import poster3 from 'figma:asset/2b4a91fac962ac8a9b51f704bf34e15e0e0e7b92.png';
 import poster4 from 'figma:asset/0f8ee55b0356fd2a56ce3d828a7505d136d9041b.png';
 import poster5 from '../assets/poster1.jpeg';
 import poster6 from '../assets/poster2.jpeg';
-import manifestoPdf from '../assets/cv.pdf';
+import manifestoPdf from '../assets/Manifesto_CNBL.pdf';
 
 interface CampaignPageProps {
   isModal?: boolean;
@@ -94,7 +94,7 @@ export function CampaignPage({ isModal = false, onClose }: CampaignPageProps) {
                 </a>
                 <a
                   href={manifestoPdf}
-                  download="Election_Manifesto_Mallick_Nazrul_Islam.pdf"
+                  download="Manifesto_CNBL.pdf"
                   className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white font-['Inter'] font-semibold rounded-xl hover:bg-white/20 transition-all duration-300 hover:scale-105"
                 >
                   <Download className="w-5 h-5" />
@@ -526,7 +526,7 @@ export function CampaignPage({ isModal = false, onClose }: CampaignPageProps) {
             </a>
             <a
               href={manifestoPdf}
-              download="Election_Manifesto_Mallick_Nazrul_Islam.pdf"
+              download="Manifesto_CNBL.pdf"
               className="inline-flex items-center gap-3 px-10 py-5 bg-white/10 backdrop-blur-sm border-2 border-white/30 text-white font-['Inter'] font-semibold text-lg rounded-xl hover:bg-white/20 transition-all duration-300 hover:scale-105"
             >
               <Download className="w-6 h-6" />
