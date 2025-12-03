@@ -145,7 +145,12 @@ export async function getGalleryImages(): Promise<GalleryImage[]> {
       return [];
     }
     
-    return data || [];
+    // Map database column names (lowercase) to TypeScript interface (camelCase)
+    // PostgreSQL returns column names in lowercase unless quoted
+    return (data || []).map((item: any) => ({
+      ...item,
+      imageUrl: item.imageurl || item.imageUrl || '', // Handle both lowercase and camelCase
+    }));
   } catch (error) {
     console.warn('Exception fetching gallery images:', error);
     return [];
@@ -203,7 +208,15 @@ export async function createGalleryImage(image: Omit<GalleryImage, 'id' | 'creat
       }
     }
     
-    return data;
+    // Map database column names (lowercase) to TypeScript interface (camelCase)
+    if (data) {
+      return {
+        ...data,
+        imageUrl: data.imageurl || data.imageUrl || '', // Convert lowercase to camelCase
+      } as GalleryImage;
+    }
+    
+    return null;
   } catch (error: any) {
     // Re-throw with better context if it's not already a detailed error
     if (error instanceof Error && error.message && !error.message.includes('Database') && !error.message.includes('table') && !error.message.includes('RLS')) {
@@ -237,7 +250,15 @@ export async function updateGalleryImage(id: string, updates: Partial<GalleryIma
     throw error;
   }
   
-  return data;
+  // Map database column names (lowercase) to TypeScript interface (camelCase)
+  if (data) {
+    return {
+      ...data,
+      imageUrl: data.imageurl || data.imageUrl || '', // Convert lowercase to camelCase
+    } as GalleryImage;
+  }
+  
+  return null;
 }
 
 export async function deleteGalleryImage(id: string): Promise<void> {
