@@ -190,31 +190,68 @@ export function CampaignPage({ isModal = false, onClose }: CampaignPageProps) {
       </section>
 
       {/* VISION SECTION */}
-      <section className="py-20 bg-gradient-to-br from-[#0A1A3A] to-[#15294A]">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 md:p-12 text-white">
-              <div className="flex flex-col items-center text-center mb-8">
-                <div className="w-20 h-20 rounded-full bg-[#C62828] flex items-center justify-center mb-6">
-                  <Target className="w-10 h-10 text-white" />
+      <section className="py-20 bg-gradient-to-br from-[#0A1A3A] via-[#15294A] to-[#0A1A3A] relative overflow-hidden">
+        {/* Decorative background elements */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-10 left-10 w-32 h-32 bg-[#C62828] rounded-full blur-3xl"></div>
+          <div className="absolute bottom-10 right-10 w-40 h-40 bg-[#C62828] rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#C62828] rounded-full blur-3xl"></div>
+        </div>
+        
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-gradient-to-br from-white/15 via-white/10 to-white/5 backdrop-blur-md border-2 border-white/20 rounded-3xl p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
+              {/* Shine effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 animate-shimmer"></div>
+              
+              {/* Corner accents */}
+              <div className="absolute top-0 left-0 w-20 h-20 border-t-4 border-l-4 border-[#C62828] rounded-tl-3xl"></div>
+              <div className="absolute bottom-0 right-0 w-20 h-20 border-b-4 border-r-4 border-[#C62828] rounded-br-3xl"></div>
+              
+              <div className="flex flex-col items-center text-center mb-8 relative z-10">
+                <div className="relative mb-6">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#C62828] to-[#A52020] flex items-center justify-center shadow-xl">
+                    <Target className="w-12 h-12 text-white" />
+                  </div>
+                  <div className="absolute -top-1 -right-1 w-8 h-8 bg-[#C62828] rounded-full animate-pulse"></div>
                 </div>
-                <h3 className="font-['Montserrat'] text-3xl md:text-4xl mb-6 text-white">My Vision</h3>
+                <h3 className="font-['Montserrat'] text-3xl md:text-4xl mb-8 text-white font-bold tracking-wide">
+                  My Vision
+                </h3>
               </div>
-              <div className="space-y-6">
-                <p className="font-['Inter'] text-lg md:text-xl leading-relaxed text-gray-100 text-center">
-                  A stronger, more connected CNBL where every member feels valued, heard, and supported.
-                </p>
-                <p className="font-['Inter'] text-lg md:text-xl leading-relaxed text-gray-100 text-center">
-                  A community that bridges generations, fosters unity, and creates lasting bonds through 
-                  respectful leadership and genuine service.
-                </p>
-                <p className="font-['Inter'] text-lg md:text-xl leading-relaxed text-gray-100 text-center">
-                  Together, we can build unity across generations and foster a community that truly serves everyone.
-                </p>
+              
+              <div className="relative z-10">
+                <div className="bg-gradient-to-r from-[#C62828]/20 via-[#C62828]/10 to-[#C62828]/20 rounded-2xl p-6 md:p-8 border border-[#C62828]/30">
+                  <p className="font-['Inter'] text-xl md:text-2xl lg:text-3xl leading-relaxed text-white text-center font-medium">
+                    A united CNBL with strong brotherhood, modern facilities, transparent governance, and world-class member experience — powered by <span className="text-[#C62828] font-bold">700 members</span> and <span className="text-[#C62828] font-bold">25 crore fund strength</span>.
+                  </p>
+                </div>
+                
+                {/* Stats highlight */}
+                <div className="mt-6 flex flex-wrap justify-center gap-4 md:gap-6">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                    <div className="text-2xl md:text-3xl font-['Montserrat'] font-bold text-[#C62828]">700+</div>
+                    <div className="text-xs md:text-sm text-gray-300 font-['Inter']">Members</div>
+                  </div>
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
+                    <div className="text-2xl md:text-3xl font-['Montserrat'] font-bold text-[#C62828]">25 Cr</div>
+                    <div className="text-xs md:text-sm text-gray-300 font-['Inter']">Fund Strength</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+        
+        <style>{`
+          @keyframes shimmer {
+            0% { transform: translateX(-100%) skewX(-12deg); }
+            100% { transform: translateX(200%) skewX(-12deg); }
+          }
+          .animate-shimmer {
+            animation: shimmer 3s infinite;
+          }
+        `}</style>
       </section>
 
       {/* CORE MANIFESTO POINTS */}
