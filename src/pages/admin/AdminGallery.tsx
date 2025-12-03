@@ -538,11 +538,20 @@ export function AdminGallery() {
                       id="image-upload"
                       accept="image/*"
                       onChange={handleFileChange}
-                      className="hidden"
+                      className="absolute opacity-0 w-0 h-0"
+                      style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, overflow: 'hidden' }}
                     />
                     <label
                       htmlFor="image-upload"
-                      className="flex items-center justify-center gap-3 w-full px-6 py-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#C9A961] hover:bg-gray-50 transition-all"
+                      className="flex items-center justify-center gap-3 w-full px-6 py-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#C9A961] hover:bg-gray-50 active:bg-gray-100 transition-all touch-manipulation"
+                      style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
+                      onClick={(e) => {
+                        // Ensure the input is triggered on mobile
+                        const input = document.getElementById('image-upload') as HTMLInputElement;
+                        if (input) {
+                          input.click();
+                        }
+                      }}
                     >
                       <Upload className="w-5 h-5 text-gray-400" />
                       <div className="text-center">
@@ -550,7 +559,7 @@ export function AdminGallery() {
                           {editingImage ? 'Upload New Image (Optional)' : 'Upload Image from Device'}
                         </p>
                         <p className="text-xs text-gray-500 font-['Inter'] mt-1">
-                          Click to choose from gallery or camera • Max 5MB
+                          Tap to choose from gallery or camera • Max 5MB
                         </p>
                       </div>
                     </label>
@@ -675,11 +684,20 @@ export function AdminGallery() {
                     accept="image/*"
                     multiple
                     onChange={handleBulkFileChange}
-                    className="hidden"
+                    className="absolute opacity-0 w-0 h-0"
+                    style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, overflow: 'hidden' }}
                   />
                   <label
                     htmlFor="bulk-image-upload"
-                    className="flex items-center justify-center gap-3 w-full px-6 py-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#C9A961] hover:bg-gray-50 transition-all"
+                    className="flex items-center justify-center gap-3 w-full px-6 py-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#C9A961] hover:bg-gray-50 active:bg-gray-100 transition-all touch-manipulation"
+                    style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
+                    onClick={(e) => {
+                      // Ensure the input is triggered on mobile
+                      const input = document.getElementById('bulk-image-upload') as HTMLInputElement;
+                      if (input) {
+                        input.click();
+                      }
+                    }}
                   >
                     <Upload className="w-5 h-5 text-gray-400" />
                     <div className="text-center">
@@ -687,7 +705,7 @@ export function AdminGallery() {
                         Select Multiple Images from Gallery
                       </p>
                       <p className="text-xs text-gray-500 font-['Inter'] mt-1">
-                        Click to choose multiple images from gallery • Max 5MB per image
+                        Tap to choose multiple images from gallery • Max 5MB per image
                       </p>
                     </div>
                   </label>
