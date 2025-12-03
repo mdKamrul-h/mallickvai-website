@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { X, Heart, Users, Shield, Award, MessageCircle, ArrowRight, CheckCircle, Download, FileText, Target, Handshake, TrendingUp, Calendar } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import portraitImage from 'figma:asset/f3f51e39b39538153580c896dd90e282d38f15f2.png';
+import heroPortrait from '../assets/hero-portrait.jpg';
 import poster1 from 'figma:asset/023ed9ca4ae374fdbfe5539a4176e568d38262a8.png';
 import poster2 from 'figma:asset/a20a9f3344721801fd72ae2a23f262d55a5a86c2.png';
 import poster3 from 'figma:asset/2b4a91fac962ac8a9b51f704bf34e15e0e0e7b92.png';
@@ -115,8 +115,8 @@ export function CampaignPage({ isModal = false, onClose }: CampaignPageProps) {
             <div className="relative">
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20">
                 <ImageWithFallback
-                  src={portraitImage}
-                  alt="M.M. Mallick"
+                  src={heroPortrait}
+                  alt="M.M. Mallick Nazrul Islam"
                   className="w-full h-[600px] object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0A1A3A]/60 to-transparent"></div>
