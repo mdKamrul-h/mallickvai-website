@@ -101,7 +101,7 @@ export function AdminBlog() {
         author: formData.get('author') as string,
         date: formData.get('date') as string,
         category: formData.get('category') as string,
-        tags: (formData.get('tags') as string).split(',').map(t => t.trim()),
+        tags: (formData.get('tags') as string || '').split(',').map(t => t.trim()).filter(t => t.length > 0),
         imageUrl: imageUrl,
         featured: formData.get('featured') === 'on',
         published: formData.get('published') === 'on',
@@ -109,8 +109,10 @@ export function AdminBlog() {
 
       // Save to Supabase
       if (editingPost) {
-        await supabaseDb.updateBlogPost(editingPost.id, postData);
-        updateBlogPost(editingPost.id, postData); // Also update local state
+        // Exclude id from updates since it's passed separately
+        const { id, ...updates } = postData;
+        await supabaseDb.updateBlogPost(editingPost.id, updates);
+        updateBlogPost(editingPost.id, postData); // Also update local state (include id for context)
       } else {
         await supabaseDb.createBlogPost(postData);
         addBlogPost(postData); // Also update local state
@@ -136,6 +138,8 @@ export function AdminBlog() {
 
   const handleEdit = (post: BlogPost) => {
     setEditingPost(post);
+    setSelectedFile(null);
+    setPreviewUrl('');
     setShowForm(true);
   };
 
@@ -212,6 +216,8 @@ export function AdminBlog() {
             <Button
               onClick={() => {
                 setEditingPost(null);
+                setSelectedFile(null);
+                setPreviewUrl('');
                 setShowForm(true);
               }}
               className="font-['Inter']"
@@ -264,7 +270,7 @@ export function AdminBlog() {
               <h3 className="text-[#0A1929] mb-6">
                 {editingPost ? 'Edit Blog Post' : 'New Blog Post'}
               </h3>
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form key={editingPost?.id || 'new'} onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-['Inter'] font-medium text-gray-700 mb-2">
@@ -475,6 +481,8 @@ export function AdminBlog() {
                     onClick={() => {
                       setShowForm(false);
                       setEditingPost(null);
+                      setSelectedFile(null);
+                      setPreviewUrl('');
                     }}
                     className="font-['Inter']"
                   >

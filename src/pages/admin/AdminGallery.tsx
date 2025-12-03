@@ -115,53 +115,95 @@ export function AdminGallery() {
     setBulkProgress({ current: 0, total: bulkFiles.length });
 
     try {
-      const uploadPromises = bulkFiles.map(async (file, index) => {
-        try {
+      const results = await Promise.allSettled(
+        bulkFiles.map(async (file, index) => {
           // Upload image to Supabase
           const imageUrl = await uploadImage(file, STORAGE_BUCKETS.GALLERY, 'gallery');
           
           // Create gallery image data
-          const imageData: GalleryImage = {
-            id: Date.now().toString() + index,
+          const imageData: Omit<GalleryImage, 'id' | 'created_at' | 'updated_at'> = {
             title: file.name.replace(/\.[^/.]+$/, ''), // Use filename without extension as title
             description: '',
             imageUrl: imageUrl,
             category: bulkCategory,
             tags: [],
-            date: '',
+            date: new Date().toISOString().split('T')[0], // Use current date
             featured: false,
           };
 
           // Save to Supabase
-          await supabaseDb.createGalleryImage(imageData);
-          addGalleryImage(imageData);
+          const createdImage = await supabaseDb.createGalleryImage(imageData);
           
-          setBulkProgress(prev => ({ ...prev, current: prev.current + 1 }));
-        } catch (error) {
-          console.error(`Error uploading ${file.name}:`, error);
-          throw error;
-        }
-      });
+          if (createdImage) {
+            addGalleryImage(createdImage);
+            setBulkProgress(prev => ({ ...prev, current: prev.current + 1 }));
+            return { success: true, fileName: file.name, image: createdImage };
+          } else {
+            throw new Error('Failed to create gallery image record');
+          }
+        })
+      );
 
-      await Promise.all(uploadPromises);
+      // Analyze results
+      const successful = results.filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled');
+      const failed = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
 
-      // Reset bulk upload state
-      setBulkFiles([]);
-      setBulkPreviews([]);
-      setBulkCategory('');
-      setShowBulkUpload(false);
-      setHasUnsavedChanges(true);
-      setSaveSuccess(true);
-      setTimeout(() => {
-        setSaveSuccess(false);
-        setHasUnsavedChanges(false);
-      }, 2000);
+      // Reset bulk upload state if all succeeded
+      if (failed.length === 0) {
+        setBulkFiles([]);
+        setBulkPreviews([]);
+        setBulkCategory('');
+        setShowBulkUpload(false);
+        setHasUnsavedChanges(true);
+        setSaveSuccess(true);
+        setTimeout(() => {
+          setSaveSuccess(false);
+          setHasUnsavedChanges(false);
+        }, 2000);
+      } else {
+        // Show detailed error message
+        const failedFilesWithErrors = failed.map((result, index) => {
+          const originalIndex = results.findIndex(r => r === result);
+          const file = bulkFiles[originalIndex];
+          const errorMessage = result.reason?.message || result.reason || 'Unknown error';
+          console.error(`Failed to upload ${file?.name}:`, result.reason);
+          return `${file?.name || `Image ${index + 1}`} (${errorMessage})`;
+        });
+
+        const successCount = successful.length;
+        const failCount = failed.length;
+        
+        alert(
+          `Upload completed with errors:\n\n` +
+          `✅ Successfully uploaded: ${successCount} image(s)\n` +
+          `❌ Failed: ${failCount} image(s)\n\n` +
+          `Failed files:\n${failedFilesWithErrors.join('\n')}\n\n` +
+          `Please check your Supabase configuration and try uploading the failed images again.`
+        );
+
+        // Remove successfully uploaded files from the list (keep only failed ones)
+        const successfulIndices = results
+          .map((r, i) => r.status === 'fulfilled' ? i : -1)
+          .filter(i => i !== -1);
+        
+        setBulkFiles(prev => prev.filter((_, i) => !successfulIndices.includes(i)));
+        setBulkPreviews(prev => prev.filter((_, i) => !successfulIndices.includes(i)));
+        
+        setHasUnsavedChanges(true);
+        setSaveSuccess(true);
+        setTimeout(() => {
+          setSaveSuccess(false);
+          setHasUnsavedChanges(false);
+        }, 2000);
+      }
     } catch (error) {
       console.error('Error uploading images:', error);
-      alert('Failed to upload some images. Please check your Supabase configuration and try again.');
+      alert('Failed to upload images. Please check your Supabase configuration and try again.');
     } finally {
       setIsUploading(false);
-      setBulkProgress({ current: 0, total: 0 });
+      if (bulkFiles.length === 0) {
+        setBulkProgress({ current: 0, total: 0 });
+      }
     }
   };
 
