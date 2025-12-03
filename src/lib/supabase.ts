@@ -64,18 +64,11 @@ export async function uploadImage(
   const fileName = `${folder ? `${folder}/` : ''}${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
 
   try {
-    // Check if bucket exists and is accessible
-    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
-    if (listError) {
-      console.warn('Could not list buckets:', listError);
-    } else {
-      const bucketExists = buckets?.some(b => b.name === bucket);
-      if (!bucketExists) {
-        throw new Error(`Storage bucket "${bucket}" does not exist. Please create it in your Supabase dashboard under Storage.`);
-      }
-    }
-
     // Upload file to Supabase Storage
+    // Note: We don't check bucket existence first because:
+    // 1. The listBuckets() call may fail due to permissions even if bucket exists
+    // 2. The upload will fail with a clear error if bucket doesn't exist
+    // 3. This avoids false positives when bucket exists but listing is restricted
     const { data, error } = await supabase.storage
       .from(bucket)
       .upload(fileName, file, {

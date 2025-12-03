@@ -131,15 +131,21 @@ export function AdminGallery() {
             featured: false,
           };
 
-          // Save to Supabase
-          const createdImage = await supabaseDb.createGalleryImage(imageData);
-          
-          if (createdImage) {
+          // Save to Supabase database
+          try {
+            const createdImage = await supabaseDb.createGalleryImage(imageData);
+            
+            if (!createdImage) {
+              throw new Error('Database returned null - image record was not created');
+            }
+            
             addGalleryImage(createdImage);
             setBulkProgress(prev => ({ ...prev, current: prev.current + 1 }));
             return { success: true, fileName: file.name, image: createdImage };
-          } else {
-            throw new Error('Failed to create gallery image record');
+          } catch (dbError: any) {
+            // If database insert fails, we should still note that the image was uploaded to storage
+            console.error(`Image uploaded to storage but database insert failed for ${file.name}:`, dbError);
+            throw new Error(`Image uploaded successfully but failed to save record: ${dbError?.message || 'Unknown database error'}`);
           }
         })
       );
@@ -250,15 +256,16 @@ export function AdminGallery() {
         featured: formData.get('featured') === 'on',
       };
 
-      // Save to Supabase
+      // Save to Supabase database
       if (editingImage) {
         await supabaseDb.updateGalleryImage(editingImage.id, imageData);
         updateGalleryImage(editingImage.id, imageData);
       } else {
         const createdImage = await supabaseDb.createGalleryImage(imageData);
-        if (createdImage) {
-          addGalleryImage(createdImage);
+        if (!createdImage) {
+          throw new Error('Database returned null - image record was not created. Image may have been uploaded to storage but database insert failed.');
         }
+        addGalleryImage(createdImage);
       }
 
       // Refresh gallery images from Supabase to ensure sync

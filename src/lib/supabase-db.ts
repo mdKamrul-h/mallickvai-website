@@ -157,18 +157,55 @@ export async function createGalleryImage(image: Omit<GalleryImage, 'id' | 'creat
     throw new Error('Supabase is not configured');
   }
   
-  const { data, error } = await supabase
-    .from(TABLES.GALLERY_IMAGES)
-    .insert([{ ...image, id: Date.now().toString() }])
-    .select()
-    .single();
-  
-  if (error) {
-    console.error('Error creating gallery image:', error);
+  try {
+    // Ensure tags is an array (handle both array and string)
+    const tagsArray = Array.isArray(image.tags) ? image.tags : (image.tags ? [image.tags] : []);
+    
+    // Prepare data for insert
+    const insertData = {
+      ...image,
+      id: Date.now().toString(),
+      tags: tagsArray,
+      description: image.description || '', // Ensure description is not null
+      date: image.date || new Date().toISOString().split('T')[0], // Ensure date is not null
+    };
+    
+    const { data, error } = await supabase
+      .from(TABLES.GALLERY_IMAGES)
+      .insert([insertData])
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error creating gallery image:', error);
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        data: insertData
+      });
+      
+      // Provide more helpful error messages
+      if (error.code === 'PGRST116' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
+        throw new Error(`Database table "${TABLES.GALLERY_IMAGES}" does not exist. Please run the database schema SQL in your Supabase dashboard.`);
+      } else if (error.code === '42501' || error.message?.includes('permission denied') || error.message?.includes('RLS')) {
+        throw new Error(`Permission denied: Row Level Security (RLS) policies may be blocking the insert. Please check your Supabase RLS policies for the "${TABLES.GALLERY_IMAGES}" table.`);
+      } else if (error.message?.includes('null value') || error.message?.includes('violates not-null constraint')) {
+        throw new Error(`Missing required field: ${error.message}. Please ensure all required fields are provided.`);
+      } else {
+        throw new Error(`Database error: ${error.message || 'Unknown error'}. Code: ${error.code || 'N/A'}`);
+      }
+    }
+    
+    return data;
+  } catch (error: any) {
+    // Re-throw with better context if it's not already a detailed error
+    if (error instanceof Error && error.message && !error.message.includes('Database') && !error.message.includes('table') && !error.message.includes('RLS')) {
+      throw new Error(`Failed to create gallery image record: ${error.message}`);
+    }
     throw error;
   }
-  
-  return data;
 }
 
 export async function updateGalleryImage(id: string, updates: Partial<GalleryImage>): Promise<GalleryImage | null> {
