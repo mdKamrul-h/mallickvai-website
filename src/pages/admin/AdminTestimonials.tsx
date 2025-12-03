@@ -336,7 +336,7 @@ export function AdminTestimonials() {
                           {editingTestimonial ? 'Upload New Profile Image (Optional)' : 'Upload Profile Image from Device'}
                         </p>
                         <p className="text-xs text-gray-500 font-['Inter'] mt-1">
-                          Click to choose from gallery or camera • Max 5MB
+                          Click to choose from gallery or camera • Max 20MB (auto-compressed to 5MB)
                         </p>
                       </div>
                     </label>

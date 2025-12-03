@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import imageCompression from 'browser-image-compression';
 
 // Get Supabase credentials from environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -23,8 +24,48 @@ export const STORAGE_BUCKETS = {
 } as const;
 
 /**
+ * Compress an image file while maintaining high quality
+ * @param file - The image file to compress
+ * @returns Compressed image file
+ */
+async function compressImage(file: File): Promise<File> {
+  const maxSizeMB = 5; // Target size: 5MB
+  const maxWidthOrHeight = 1920; // Max dimension to maintain quality
+  const initialSizeMB = file.size / (1024 * 1024);
+
+  // If file is already under 5MB, return as-is
+  if (initialSizeMB <= maxSizeMB) {
+    return file;
+  }
+
+  try {
+    console.log(`Compressing image from ${initialSizeMB.toFixed(2)}MB to target ${maxSizeMB}MB...`);
+
+    const options = {
+      maxSizeMB: maxSizeMB,
+      maxWidthOrHeight: maxWidthOrHeight,
+      useWebWorker: true,
+      fileType: file.type, // Keep original format
+      initialQuality: 0.92, // High quality (92%)
+      alwaysKeepResolution: false, // Allow resizing if needed
+    };
+
+    const compressedFile = await imageCompression(file, options);
+    const compressedSizeMB = compressedFile.size / (1024 * 1024);
+
+    console.log(`Image compressed: ${initialSizeMB.toFixed(2)}MB → ${compressedSizeMB.toFixed(2)}MB (${((1 - compressedFile.size / file.size) * 100).toFixed(1)}% reduction)`);
+
+    return compressedFile;
+  } catch (error) {
+    console.error('Error compressing image:', error);
+    // If compression fails, return original file (will fail upload if too large)
+    throw new Error(`Failed to compress image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
  * Upload an image file to Supabase Storage
- * @param file - The image file to upload
+ * @param file - The image file to upload (will be compressed if > 5MB)
  * @param bucket - The storage bucket name
  * @param folder - Optional folder path within the bucket
  * @returns Public URL of the uploaded image
@@ -45,10 +86,10 @@ export async function uploadImage(
     throw new Error('Invalid file: File is empty or not provided.');
   }
 
-  // Check file size (max 10MB)
-  const maxSize = 10 * 1024 * 1024; // 10MB
-  if (file.size > maxSize) {
-    throw new Error(`File is too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum size is 10MB.`);
+  // Check file size (max 20MB input, will be compressed to 5MB)
+  const maxInputSize = 20 * 1024 * 1024; // 20MB
+  if (file.size > maxInputSize) {
+    throw new Error(`File is too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum input size is 20MB.`);
   }
 
   // Validate file type
@@ -56,8 +97,21 @@ export async function uploadImage(
     throw new Error(`Invalid file type: ${file.type}. Only image files are allowed.`);
   }
 
+  // Compress image if needed (target: 5MB)
+  let fileToUpload = file;
+  try {
+    fileToUpload = await compressImage(file);
+  } catch (error) {
+    // If compression fails, check if original is small enough
+    if (file.size > 5 * 1024 * 1024) {
+      throw error; // Re-throw compression error if file is still too large
+    }
+    // If original is small enough, use it
+    fileToUpload = file;
+  }
+
   // Generate unique filename
-  const fileExt = file.name.split('.').pop();
+  const fileExt = fileToUpload.name.split('.').pop() || file.name.split('.').pop();
   if (!fileExt) {
     throw new Error('File has no extension. Please ensure the file has a valid image extension.');
   }
@@ -71,7 +125,7 @@ export async function uploadImage(
     // 3. This avoids false positives when bucket exists but listing is restricted
     const { data, error } = await supabase.storage
       .from(bucket)
-      .upload(fileName, file, {
+      .upload(fileName, fileToUpload, {
         cacheControl: '3600',
         upsert: false,
       });
@@ -104,7 +158,8 @@ export async function uploadImage(
       error,
       bucket,
       fileName,
-      fileSize: file.size,
+      originalFileSize: file.size,
+      compressedFileSize: fileToUpload.size,
       fileType: file.type,
       supabaseUrl: supabaseUrl ? 'Configured' : 'Not configured',
     });

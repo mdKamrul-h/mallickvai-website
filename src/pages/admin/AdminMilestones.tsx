@@ -400,7 +400,7 @@ export function AdminMilestones() {
                           Upload Images from Device
                         </p>
                         <p className="text-xs text-gray-500 font-['Inter'] mt-1">
-                          Click to choose from gallery or camera • Multiple images • Max 5MB each
+                          Click to choose from gallery or camera • Multiple images • Max 20MB each (auto-compressed to 5MB)
                         </p>
                       </div>
                     </label>

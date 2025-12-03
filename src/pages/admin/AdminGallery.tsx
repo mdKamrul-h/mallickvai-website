@@ -559,7 +559,7 @@ export function AdminGallery() {
                           {editingImage ? 'Upload New Image (Optional)' : 'Upload Image from Device'}
                         </p>
                         <p className="text-xs text-gray-500 font-['Inter'] mt-1">
-                          Tap to choose from gallery or camera • Max 5MB
+                          Tap to choose from gallery or camera • Max 20MB (auto-compressed to 5MB)
                         </p>
                       </div>
                     </label>
@@ -705,7 +705,7 @@ export function AdminGallery() {
                         Select Multiple Images from Gallery
                       </p>
                       <p className="text-xs text-gray-500 font-['Inter'] mt-1">
-                        Tap to choose multiple images from gallery • Max 5MB per image
+                        Tap to choose multiple images from gallery • Max 20MB per image (auto-compressed to 5MB)
                       </p>
                     </div>
                   </label>
