@@ -42,52 +42,98 @@ export function AdminGallery() {
       // Validate file type
       if (!file.type.startsWith('image/')) {
         alert('Please select an image file');
+        // Reset input
+        e.target.value = '';
         return;
       }
       
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image size should be less than 5MB');
+      // Validate file size (max 20MB - will be auto-compressed to 5MB)
+      const maxSize = 20 * 1024 * 1024; // 20MB
+      if (file.size > maxSize) {
+        alert(`Image size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds the maximum allowed size of 20MB. Please select a smaller image.`);
+        // Reset input
+        e.target.value = '';
         return;
       }
+      
+      console.log('File selected:', file.name, 'Size:', (file.size / 1024 / 1024).toFixed(2), 'MB', 'Type:', file.type);
       
       setSelectedFile(file);
       
       // Create preview
       const reader = new FileReader();
+      reader.onerror = () => {
+        console.error('Error reading file for preview');
+        alert('Error reading image file. Please try again.');
+        setSelectedFile(null);
+        e.target.value = '';
+      };
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
       };
       reader.readAsDataURL(file);
+    } else {
+      console.warn('No file selected');
     }
   };
 
   const handleBulkFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     
+    if (files.length === 0) {
+      console.warn('No files selected for bulk upload');
+      return;
+    }
+    
+    console.log(`Processing ${files.length} file(s) for bulk upload...`);
+    
     // Validate files
-    const validFiles = files.filter(file => {
+    const maxSize = 20 * 1024 * 1024; // 20MB
+    const validFiles: File[] = [];
+    const invalidFiles: string[] = [];
+    
+    files.forEach(file => {
       if (!file.type.startsWith('image/')) {
-        alert(`${file.name} is not an image file`);
-        return false;
+        invalidFiles.push(`${file.name} (not an image file)`);
+        return;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        alert(`${file.name} is larger than 5MB`);
-        return false;
+      if (file.size > maxSize) {
+        invalidFiles.push(`${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB - exceeds 20MB limit)`);
+        return;
       }
-      return true;
+      validFiles.push(file);
+      console.log('Valid file:', file.name, 'Size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
     });
+    
+    if (invalidFiles.length > 0) {
+      alert(
+        `Some files were skipped:\n\n${invalidFiles.join('\n')}\n\n` +
+        `Only image files under 20MB are allowed (will be auto-compressed to 5MB).`
+      );
+    }
+    
+    if (validFiles.length === 0) {
+      // Reset input if no valid files
+      e.target.value = '';
+      return;
+    }
     
     setBulkFiles(prev => [...prev, ...validFiles]);
     
     // Create previews
-    validFiles.forEach(file => {
+    validFiles.forEach((file, index) => {
       const reader = new FileReader();
+      reader.onerror = () => {
+        console.error(`Error reading preview for ${file.name}`);
+      };
       reader.onloadend = () => {
         setBulkPreviews(prev => [...prev, reader.result as string]);
       };
       reader.readAsDataURL(file);
     });
+    
+    // Reset input to allow selecting the same files again if needed
+    e.target.value = '';
   };
 
   const handleRemoveFile = () => {
@@ -115,25 +161,31 @@ export function AdminGallery() {
     setBulkProgress({ current: 0, total: bulkFiles.length });
 
     try {
+      console.log(`Starting bulk upload of ${bulkFiles.length} image(s)...`);
+      
       const results = await Promise.allSettled(
         bulkFiles.map(async (file, index) => {
-          // Upload image to Supabase
-          const imageUrl = await uploadImage(file, STORAGE_BUCKETS.GALLERY, 'gallery');
-          
-          // Create gallery image data
-          // Bulk upload: Keep title empty (user can edit later if needed)
-          const imageData: Omit<GalleryImage, 'id' | 'created_at' | 'updated_at'> = {
-            title: '', // Empty title for bulk upload
-            description: '',
-            imageUrl: imageUrl,
-            category: bulkCategory,
-            tags: [],
-            date: new Date().toISOString().split('T')[0], // Use current date
-            featured: false,
-          };
-
-          // Save to Supabase database
           try {
+            console.log(`[${index + 1}/${bulkFiles.length}] Uploading: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)...`);
+            
+            // Upload image to Supabase
+            const imageUrl = await uploadImage(file, STORAGE_BUCKETS.GALLERY, 'gallery');
+            console.log(`[${index + 1}/${bulkFiles.length}] Upload successful: ${imageUrl}`);
+            
+            // Create gallery image data
+            // Bulk upload: Keep title empty (user can edit later if needed)
+            const imageData: Omit<GalleryImage, 'id' | 'created_at' | 'updated_at'> = {
+              title: '', // Empty title for bulk upload
+              description: '',
+              imageUrl: imageUrl,
+              category: bulkCategory,
+              tags: [],
+              date: new Date().toISOString().split('T')[0], // Use current date
+              featured: false,
+            };
+
+            // Save to Supabase database
+            console.log(`[${index + 1}/${bulkFiles.length}] Saving to database...`);
             const createdImage = await supabaseDb.createGalleryImage(imageData);
             
             if (!createdImage) {
@@ -141,6 +193,7 @@ export function AdminGallery() {
             }
             
             addGalleryImage(createdImage);
+            console.log(`[${index + 1}/${bulkFiles.length}] Successfully saved: ${createdImage.id}`);
             setBulkProgress(prev => ({ ...prev, current: prev.current + 1 }));
             return { success: true, fileName: file.name, image: createdImage };
           } catch (dbError: any) {
@@ -150,6 +203,8 @@ export function AdminGallery() {
           }
         })
       );
+      
+      console.log('Bulk upload completed. Processing results...');
 
       // Analyze results
       const successful = results.filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled');
@@ -233,6 +288,8 @@ export function AdminGallery() {
       
       // Upload new image to Supabase if a file was selected
       if (selectedFile) {
+        console.log('Starting image upload:', selectedFile.name, 'Size:', (selectedFile.size / 1024 / 1024).toFixed(2), 'MB');
+        
         // Delete old image if it's a Supabase image
         if (editingImage?.imageUrl && isSupabaseUrl(editingImage.imageUrl)) {
           try {
@@ -243,7 +300,13 @@ export function AdminGallery() {
         }
         
         // Upload new image
-        imageUrl = await uploadImage(selectedFile, STORAGE_BUCKETS.GALLERY, 'gallery');
+        try {
+          imageUrl = await uploadImage(selectedFile, STORAGE_BUCKETS.GALLERY, 'gallery');
+          console.log('Image uploaded successfully:', imageUrl);
+        } catch (error: any) {
+          console.error('Upload error:', error);
+          throw new Error(`Failed to upload image: ${error?.message || 'Unknown error occurred'}`);
+        }
       }
       
       const tagsInput = (formData.get('tags') as string) || '';
@@ -258,34 +321,44 @@ export function AdminGallery() {
       };
 
       // Save to Supabase database
-      if (editingImage) {
-        await supabaseDb.updateGalleryImage(editingImage.id, imageData);
-        updateGalleryImage(editingImage.id, imageData);
-      } else {
-        const createdImage = await supabaseDb.createGalleryImage(imageData);
-        if (!createdImage) {
-          throw new Error('Database returned null - image record was not created. Image may have been uploaded to storage but database insert failed.');
+      try {
+        if (editingImage) {
+          console.log('Updating gallery image in database...');
+          await supabaseDb.updateGalleryImage(editingImage.id, imageData);
+          updateGalleryImage(editingImage.id, imageData);
+          console.log('Gallery image updated successfully');
+        } else {
+          console.log('Creating new gallery image in database...');
+          const createdImage = await supabaseDb.createGalleryImage(imageData);
+          if (!createdImage) {
+            throw new Error('Database returned null - image record was not created. Image may have been uploaded to storage but database insert failed.');
+          }
+          addGalleryImage(createdImage);
+          console.log('Gallery image created successfully:', createdImage.id);
         }
-        addGalleryImage(createdImage);
-      }
 
-      // Refresh gallery images from Supabase to ensure sync
-      await refreshGalleryImages();
-      
-      setShowForm(false);
-      setEditingImage(null);
-      setSelectedFile(null);
-      setPreviewUrl('');
-      setHasUnsavedChanges(true);
-      setSaveSuccess(true);
-      setTimeout(() => {
-        setSaveSuccess(false);
-        setHasUnsavedChanges(false);
-      }, 2000);
+        // Refresh gallery images from Supabase to ensure sync
+        await refreshGalleryImages();
+        console.log('Gallery images refreshed');
+        
+        setShowForm(false);
+        setEditingImage(null);
+        setSelectedFile(null);
+        setPreviewUrl('');
+        setHasUnsavedChanges(true);
+        setSaveSuccess(true);
+        setTimeout(() => {
+          setSaveSuccess(false);
+          setHasUnsavedChanges(false);
+        }, 2000);
+      } catch (dbError: any) {
+        console.error('Database error:', dbError);
+        throw new Error(`Failed to save image record: ${dbError?.message || 'Unknown database error'}`);
+      }
     } catch (error: any) {
-      console.error('Error uploading image:', error);
+      console.error('Error saving gallery image:', error);
       const errorMessage = error?.message || 'Unknown error occurred';
-      alert(`Failed to upload image:\n\n${errorMessage}\n\nPlease check your Supabase configuration and try again.`);
+      alert(`Failed to save image:\n\n${errorMessage}\n\nPlease check:\n1. Your internet connection\n2. Supabase configuration\n3. Browser console for details`);
     } finally {
       setIsUploading(false);
     }

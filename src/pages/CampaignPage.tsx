@@ -3,7 +3,7 @@ import image_821ae93c1cfa3a4a90e8b5e1a70890cab1bb25c7 from 'figma:asset/821ae93c
 import image_595be24ab299dc2c12b2638741d506725bcadb93 from 'figma:asset/595be24ab299dc2c12b2638741d506725bcadb93.png';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { X, Heart, Users, Shield, Award, MessageCircle, ArrowRight, CheckCircle, Download, FileText, Target, Handshake, TrendingUp, Calendar, Star } from 'lucide-react';
+import { X, Heart, Users, Shield, Award, MessageCircle, ArrowRight, CheckCircle, Download, FileText, Target, Handshake, TrendingUp, Calendar } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import portraitImage from 'figma:asset/f3f51e39b39538153580c896dd90e282d38f15f2.png';
@@ -169,7 +169,7 @@ export function CampaignPage({ isModal = false, onClose }: CampaignPageProps) {
             <div className="inline-block mb-6">
               <FileText className="w-16 h-16 mx-auto text-[#C62828]" />
             </div>
-            <h2 className="font-['Montserrat'] text-3xl md:text-4xl mb-4">
+            <h2 className="font-['Montserrat'] text-3xl md:text-4xl mb-4 text-white">
               Download the Complete Election Manifesto
             </h2>
             <p className="text-gray-300 font-['Inter'] text-lg mb-8 max-w-2xl mx-auto">
@@ -189,34 +189,27 @@ export function CampaignPage({ isModal = false, onClose }: CampaignPageProps) {
         </div>
       </section>
 
-      {/* VISION & MISSION SECTION */}
-      <section className="py-20 bg-white">
+      {/* VISION SECTION */}
+      <section className="py-20 bg-gradient-to-br from-[#0A1A3A] to-[#15294A]">
         <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-8 mb-16">
-              {/* Vision */}
-              <div className="bg-gradient-to-br from-[#0A1A3A] to-[#15294A] rounded-2xl p-8 text-white">
-                <div className="w-16 h-16 rounded-full bg-[#C62828] flex items-center justify-center mb-6">
-                  <Target className="w-8 h-8 text-white" />
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-8 md:p-12 text-white">
+              <div className="flex flex-col items-center text-center mb-8">
+                <div className="w-20 h-20 rounded-full bg-[#C62828] flex items-center justify-center mb-6">
+                  <Target className="w-10 h-10 text-white" />
                 </div>
-                <h3 className="font-['Montserrat'] text-2xl md:text-3xl mb-4">My Vision</h3>
-                <p className="font-['Inter'] text-lg leading-relaxed text-gray-200">
-                  A stronger, more connected CNBL where every member feels valued, heard, and supported. 
+                <h3 className="font-['Montserrat'] text-3xl md:text-4xl mb-6 text-white">My Vision</h3>
+              </div>
+              <div className="space-y-6">
+                <p className="font-['Inter'] text-lg md:text-xl leading-relaxed text-gray-100 text-center">
+                  A stronger, more connected CNBL where every member feels valued, heard, and supported.
+                </p>
+                <p className="font-['Inter'] text-lg md:text-xl leading-relaxed text-gray-100 text-center">
                   A community that bridges generations, fosters unity, and creates lasting bonds through 
                   respectful leadership and genuine service.
                 </p>
-              </div>
-
-              {/* Mission */}
-              <div className="bg-gradient-to-br from-[#C62828] to-[#A52020] rounded-2xl p-8 text-white">
-                <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-6">
-                  <Star className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="font-['Montserrat'] text-2xl md:text-3xl mb-4">My Mission</h3>
-                <p className="font-['Inter'] text-lg leading-relaxed text-gray-100">
-                  To lead with calm and serve with heart, bringing together all generations of CNBL members 
-                  through transparent leadership, enhanced member welfare, and meaningful engagement that 
-                  strengthens our collective bond.
+                <p className="font-['Inter'] text-lg md:text-xl leading-relaxed text-gray-100 text-center">
+                  Together, we can build unity across generations and foster a community that truly serves everyone.
                 </p>
               </div>
             </div>
