@@ -178,7 +178,7 @@ export function CampaignPage({ isModal = false, onClose }: CampaignPageProps) {
             </p>
             <a
               href={manifestoPdf}
-              download="Election_Manifesto_Mallick_Nazrul_Islam.pdf"
+              download="Manifesto_CNBL.pdf"
               className="inline-flex items-center justify-center gap-3 px-10 py-5 bg-[#C62828] text-white font-['Inter'] font-semibold text-lg rounded-xl hover:bg-[#A52020] transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105"
             >
               <Download className="w-6 h-6" />
