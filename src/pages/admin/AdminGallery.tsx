@@ -22,6 +22,7 @@ export function AdminGallery() {
   const [bulkFiles, setBulkFiles] = useState<File[]>([]);
   const [bulkPreviews, setBulkPreviews] = useState<string[]>([]);
   const [bulkCategory, setBulkCategory] = useState('');
+  const [bulkTitles, setBulkTitles] = useState<{ [key: number]: string }>({});
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
   const [isUploading, setIsUploading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -121,8 +122,16 @@ export function AdminGallery() {
           const imageUrl = await uploadImage(file, STORAGE_BUCKETS.GALLERY, 'gallery');
           
           // Create gallery image data
+          // Use custom title if provided, otherwise use a cleaned filename
+          const customTitle = bulkTitles[index]?.trim();
+          const defaultTitle = file.name
+            .replace(/\.[^/.]+$/, '') // Remove extension
+            .replace(/[_-]/g, ' ') // Replace underscores and dashes with spaces
+            .replace(/\b\w/g, l => l.toUpperCase()) // Capitalize first letter of each word
+            .trim();
+          
           const imageData: Omit<GalleryImage, 'id' | 'created_at' | 'updated_at'> = {
-            title: file.name.replace(/\.[^/.]+$/, ''), // Use filename without extension as title
+            title: customTitle || defaultTitle || 'Untitled Image',
             description: '',
             imageUrl: imageUrl,
             category: bulkCategory,
@@ -196,6 +205,18 @@ export function AdminGallery() {
         
         setBulkFiles(prev => prev.filter((_, i) => !successfulIndices.includes(i)));
         setBulkPreviews(prev => prev.filter((_, i) => !successfulIndices.includes(i)));
+        
+        // Update titles to match new indices after removing successful uploads
+        const newTitles: { [key: number]: string } = {};
+        bulkPreviews.forEach((_, oldIndex) => {
+          if (!successfulIndices.includes(oldIndex)) {
+            const newIndex = oldIndex - successfulIndices.filter(i => i < oldIndex).length;
+            if (bulkTitles[oldIndex]) {
+              newTitles[newIndex] = bulkTitles[oldIndex];
+            }
+          }
+        });
+        setBulkTitles(newTitles);
         
         setHasUnsavedChanges(true);
         setSaveSuccess(true);
@@ -371,6 +392,10 @@ export function AdminGallery() {
                   setEditingImage(null);
                   setShowForm(true);
                   setShowBulkUpload(false);
+                  setBulkFiles([]);
+                  setBulkPreviews([]);
+                  setBulkTitles({});
+                  setBulkCategory('');
                 }}
                 variant="outline"
                 className="font-['Inter']"
@@ -383,6 +408,10 @@ export function AdminGallery() {
                   setShowBulkUpload(true);
                   setShowForm(false);
                   setEditingImage(null);
+                  setBulkFiles([]);
+                  setBulkPreviews([]);
+                  setBulkTitles({});
+                  setBulkCategory('');
                 }}
                 className="font-['Inter']"
                 style={{ background: 'linear-gradient(135deg, #C9A961 0%, #B76E79 100%)' }}
@@ -632,10 +661,10 @@ export function AdminGallery() {
             <CardContent className="p-6">
               <h3 className="text-[#0A1929] mb-6">Bulk Upload Images</h3>
               
-              {/* Category Selection */}
+              {/* Album/Category Selection */}
               <div className="mb-6">
                 <label className="block text-sm font-['Inter'] font-medium text-gray-700 mb-2">
-                  Category *
+                  Select Album/Category *
                 </label>
                 <select
                   value={bulkCategory}
@@ -643,14 +672,20 @@ export function AdminGallery() {
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg font-['Inter'] focus:outline-none focus:ring-2 focus:ring-[#C9A961]"
                 >
-                  <option value="">Select Category</option>
+                  <option value="">Select Album/Category</option>
                   <option value="Community">Community</option>
                   <option value="Professional">Professional</option>
                   <option value="Events">Events</option>
                   <option value="Awards">Awards</option>
                   <option value="Leadership">Leadership</option>
+                  <option value="CNBL">CNBL</option>
+                  <option value="Batch Reunions">Batch Reunions</option>
+                  <option value="Conferences">Conferences</option>
                   <option value="Other">Other</option>
                 </select>
+                <p className="text-xs text-gray-500 font-['Inter'] mt-1">
+                  All selected images will be added to this album/category. You can edit individual titles below.
+                </p>
               </div>
 
               {/* File Upload Input */}
@@ -687,34 +722,56 @@ export function AdminGallery() {
                 )}
               </div>
 
-              {/* Preview Grid */}
+              {/* Preview Grid with Title Inputs */}
               {bulkPreviews.length > 0 && (
                 <div className="mb-6">
                   <h4 className="text-sm font-['Inter'] font-medium text-gray-700 mb-3">
-                    Selected Images ({bulkPreviews.length})
+                    Selected Images ({bulkPreviews.length}) - Edit Titles
                   </h4>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {bulkPreviews.map((preview, index) => (
-                      <div key={index} className="relative group">
-                        <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                          <img
-                            src={preview}
-                            alt={`Preview ${index + 1}`}
-                            className="w-full h-full object-cover"
-                          />
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {bulkPreviews.map((preview, index) => {
+                      const fileName = bulkFiles[index]?.name || '';
+                      const defaultTitle = fileName
+                        .replace(/\.[^/.]+$/, '') // Remove extension
+                        .replace(/[_-]/g, ' ') // Replace underscores and dashes with spaces
+                        .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize first letter of each word
+                      
+                      return (
+                        <div key={index} className="border border-gray-200 rounded-lg p-3 bg-white">
+                          <div className="relative group mb-2">
+                            <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                              <img
+                                src={preview}
+                                alt={`Preview ${index + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveBulkFile(index)}
+                              className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-['Inter'] font-medium text-gray-700 mb-1">
+                              Title *
+                            </label>
+                            <input
+                              type="text"
+                              value={bulkTitles[index] || defaultTitle}
+                              onChange={(e) => setBulkTitles(prev => ({ ...prev, [index]: e.target.value }))}
+                              placeholder="Enter image title"
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded font-['Inter'] focus:outline-none focus:ring-1 focus:ring-[#C9A961]"
+                            />
+                            <p className="text-xs text-gray-500 font-['Inter'] mt-1 truncate" title={fileName}>
+                              File: {fileName}
+                            </p>
+                          </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveBulkFile(index)}
-                          className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                        <p className="text-xs text-gray-600 font-['Inter'] mt-1 truncate">
-                          {bulkFiles[index]?.name}
-                        </p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -766,6 +823,7 @@ export function AdminGallery() {
                     setShowBulkUpload(false);
                     setBulkFiles([]);
                     setBulkPreviews([]);
+                    setBulkTitles({});
                     setBulkCategory('');
                   }}
                   disabled={isUploading}
