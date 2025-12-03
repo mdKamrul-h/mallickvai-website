@@ -87,14 +87,30 @@ export function GalleryPage() {
 
   const categories = ['All', ...Array.from(new Set(photos.map(p => p.category)))];
 
-  const albums = [
-    { title: 'CNBL Events', cover: photos[0]?.src || '', count: photos.filter(p => p.category === 'CNBL').length, category: 'CNBL' },
-    { title: 'Corporate', cover: photos[1]?.src || '', count: photos.filter(p => p.category === 'Corporate').length, category: 'Corporate' },
-    { title: 'Batch \'99', cover: photos[2]?.src || '', count: photos.filter(p => p.category === 'Batch Reunions').length, category: 'Batch Reunions' },
-    { title: 'Conferences', cover: photos[3]?.src || '', count: photos.filter(p => p.category === 'Conferences').length, category: 'Conferences' },
-    { title: 'Awards', cover: photos[4]?.src || '', count: photos.filter(p => p.category === 'Awards').length, category: 'Awards' },
-    { title: 'Milestones', cover: photos[5]?.src || '', count: photos.length, category: 'All' }
-  ];
+  // Dynamically create albums from actual categories in the gallery
+  const albums = categories
+    .filter(cat => cat !== 'All') // Exclude 'All' category
+    .map(category => {
+      const categoryPhotos = photos.filter(p => p.category === category);
+      const firstPhoto = categoryPhotos[0];
+      
+      return {
+        title: category,
+        cover: firstPhoto?.src || '',
+        count: categoryPhotos.length,
+        category: category
+      };
+    })
+    .filter(album => album.count > 0) // Only show albums with photos
+    .concat([
+      // Add "All Photos" album at the end
+      {
+        title: 'All Photos',
+        cover: photos[0]?.src || '',
+        count: photos.length,
+        category: 'All'
+      }
+    ]);
 
   const filteredPhotos = selectedCategory === 'All' 
     ? photos 
