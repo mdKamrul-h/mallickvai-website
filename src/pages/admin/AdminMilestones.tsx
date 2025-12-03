@@ -117,9 +117,10 @@ export function AdminMilestones() {
         setSaveSuccess(false);
         setHasUnsavedChanges(false);
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading images:', error);
-      alert('Failed to upload images. Please check your Supabase configuration and try again.');
+      const errorMessage = error?.message || 'Unknown error occurred';
+      alert(`Failed to upload images:\n\n${errorMessage}\n\nPlease check your Supabase configuration and try again.`);
     } finally {
       setIsUploading(false);
     }

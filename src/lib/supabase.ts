@@ -35,14 +35,46 @@ export async function uploadImage(
   folder: string = ''
 ): Promise<string> {
   if (!supabase) {
-    throw new Error('Supabase is not configured. Please check your environment variables.');
+    const errorMsg = 'Supabase is not configured. Please check your .env file and ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.';
+    console.error(errorMsg);
+    throw new Error(errorMsg);
+  }
+
+  // Validate file
+  if (!file || file.size === 0) {
+    throw new Error('Invalid file: File is empty or not provided.');
+  }
+
+  // Check file size (max 10MB)
+  const maxSize = 10 * 1024 * 1024; // 10MB
+  if (file.size > maxSize) {
+    throw new Error(`File is too large: ${(file.size / 1024 / 1024).toFixed(2)}MB. Maximum size is 10MB.`);
+  }
+
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    throw new Error(`Invalid file type: ${file.type}. Only image files are allowed.`);
   }
 
   // Generate unique filename
   const fileExt = file.name.split('.').pop();
+  if (!fileExt) {
+    throw new Error('File has no extension. Please ensure the file has a valid image extension.');
+  }
   const fileName = `${folder ? `${folder}/` : ''}${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
 
   try {
+    // Check if bucket exists and is accessible
+    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+    if (listError) {
+      console.warn('Could not list buckets:', listError);
+    } else {
+      const bucketExists = buckets?.some(b => b.name === bucket);
+      if (!bucketExists) {
+        throw new Error(`Storage bucket "${bucket}" does not exist. Please create it in your Supabase dashboard under Storage.`);
+      }
+    }
+
     // Upload file to Supabase Storage
     const { data, error } = await supabase.storage
       .from(bucket)
@@ -52,7 +84,16 @@ export async function uploadImage(
       });
 
     if (error) {
-      throw error;
+      // Provide more specific error messages
+      if (error.message?.includes('new row violates row-level security')) {
+        throw new Error(`Permission denied: The storage bucket "${bucket}" may have RLS policies that prevent uploads. Please check your Supabase storage policies.`);
+      } else if (error.message?.includes('Bucket not found')) {
+        throw new Error(`Storage bucket "${bucket}" not found. Please create it in your Supabase dashboard under Storage.`);
+      } else if (error.message?.includes('JWT')) {
+        throw new Error('Authentication error: Please check your Supabase anon key in the .env file.');
+      } else {
+        throw new Error(`Upload failed: ${error.message || 'Unknown error'}`);
+      }
     }
 
     // Get public URL
@@ -61,13 +102,26 @@ export async function uploadImage(
       .getPublicUrl(fileName);
 
     if (!urlData?.publicUrl) {
-      throw new Error('Failed to get public URL for uploaded image');
+      throw new Error('Failed to get public URL for uploaded image. The file may have been uploaded but the bucket may not be public.');
     }
 
     return urlData.publicUrl;
-  } catch (error) {
-    console.error('Error uploading image to Supabase:', error);
-    throw error;
+  } catch (error: any) {
+    console.error('Error uploading image to Supabase:', {
+      error,
+      bucket,
+      fileName,
+      fileSize: file.size,
+      fileType: file.type,
+      supabaseUrl: supabaseUrl ? 'Configured' : 'Not configured',
+    });
+    
+    // Re-throw with more context if it's not already a detailed error
+    if (error instanceof Error && error.message) {
+      throw error;
+    }
+    
+    throw new Error(`Failed to upload image: ${error?.message || 'Unknown error occurred'}`);
   }
 }
 

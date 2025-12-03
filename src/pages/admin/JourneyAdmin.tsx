@@ -353,9 +353,10 @@ export function JourneyAdmin() {
       
       setMilestones(updatedMilestones);
       setHasUnsavedChanges(true);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading image:', error);
-      alert('Failed to upload image. Please check your Supabase configuration and try again.');
+      const errorMessage = error?.message || 'Unknown error occurred';
+      alert(`Failed to upload image:\n\n${errorMessage}\n\nPlease check your Supabase configuration and try again.`);
     } finally {
       setIsUploading(false);
       setUploadingImageId(null);

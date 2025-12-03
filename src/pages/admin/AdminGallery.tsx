@@ -11,7 +11,7 @@ import * as supabaseDb from '../../lib/supabase-db';
 
 // Gallery Manager with Mobile Image Upload Support - v3.0
 export function AdminGallery() {
-  const { galleryImages, addGalleryImage, updateGalleryImage, deleteGalleryImage } = useContent();
+  const { galleryImages, addGalleryImage, updateGalleryImage, deleteGalleryImage, refreshGalleryImages } = useContent();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [editingImage, setEditingImage] = useState<GalleryImage | null>(null);
@@ -154,6 +154,8 @@ export function AdminGallery() {
         setBulkPreviews([]);
         setBulkCategory('');
         setShowBulkUpload(false);
+        // Refresh gallery images from Supabase to ensure sync
+        await refreshGalleryImages();
         setHasUnsavedChanges(true);
         setSaveSuccess(true);
         setTimeout(() => {
@@ -238,8 +240,7 @@ export function AdminGallery() {
       }
       
       const tagsInput = (formData.get('tags') as string) || '';
-      const imageData: GalleryImage = {
-        id: editingImage?.id || Date.now().toString(),
+      const imageData: Omit<GalleryImage, 'id' | 'created_at' | 'updated_at'> = {
         title: formData.get('title') as string,
         description: (formData.get('description') as string) || '',
         imageUrl: imageUrl,
@@ -254,10 +255,15 @@ export function AdminGallery() {
         await supabaseDb.updateGalleryImage(editingImage.id, imageData);
         updateGalleryImage(editingImage.id, imageData);
       } else {
-        await supabaseDb.createGalleryImage(imageData);
-        addGalleryImage(imageData);
+        const createdImage = await supabaseDb.createGalleryImage(imageData);
+        if (createdImage) {
+          addGalleryImage(createdImage);
+        }
       }
 
+      // Refresh gallery images from Supabase to ensure sync
+      await refreshGalleryImages();
+      
       setShowForm(false);
       setEditingImage(null);
       setSelectedFile(null);
@@ -268,9 +274,10 @@ export function AdminGallery() {
         setSaveSuccess(false);
         setHasUnsavedChanges(false);
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading image:', error);
-      alert('Failed to upload image. Please check your Supabase configuration and try again.');
+      const errorMessage = error?.message || 'Unknown error occurred';
+      alert(`Failed to upload image:\n\n${errorMessage}\n\nPlease check your Supabase configuration and try again.`);
     } finally {
       setIsUploading(false);
     }

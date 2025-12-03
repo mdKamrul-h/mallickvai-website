@@ -11,7 +11,7 @@ import * as supabaseDb from '../../lib/supabase-db';
 
 // Blog CMS with Mobile Image Upload Support - v2.0
 export function AdminBlog() {
-  const { blogPosts, addBlogPost, updateBlogPost, deleteBlogPost } = useContent();
+  const { blogPosts, addBlogPost, updateBlogPost, deleteBlogPost, refreshBlogPosts } = useContent();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
@@ -114,9 +114,14 @@ export function AdminBlog() {
         await supabaseDb.updateBlogPost(editingPost.id, updates);
         updateBlogPost(editingPost.id, postData); // Also update local state (include id for context)
       } else {
-        await supabaseDb.createBlogPost(postData);
-        addBlogPost(postData); // Also update local state
+        const createdPost = await supabaseDb.createBlogPost(postData);
+        if (createdPost) {
+          addBlogPost(createdPost); // Also update local state
+        }
       }
+
+      // Refresh blog posts from Supabase to ensure sync
+      await refreshBlogPosts();
 
       setShowForm(false);
       setEditingPost(null);
@@ -128,9 +133,10 @@ export function AdminBlog() {
         setSaveSuccess(false);
         setHasUnsavedChanges(false);
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving blog post:', error);
-      alert('Failed to save blog post. Please check your Supabase configuration and try again.');
+      const errorMessage = error?.message || 'Unknown error occurred';
+      alert(`Failed to save blog post:\n\n${errorMessage}\n\nPlease check your Supabase configuration and try again.`);
     } finally {
       setIsUploading(false);
     }

@@ -15,12 +15,14 @@ interface ContentContextType {
   addBlogPost: (post: BlogPost) => void;
   updateBlogPost: (id: string, post: Partial<BlogPost>) => void;
   deleteBlogPost: (id: string) => void;
+  refreshBlogPosts: () => Promise<void>;
   
   // Gallery Images
   galleryImages: GalleryImage[];
   addGalleryImage: (image: GalleryImage) => void;
   updateGalleryImage: (id: string, image: Partial<GalleryImage>) => void;
   deleteGalleryImage: (id: string) => void;
+  refreshGalleryImages: () => Promise<void>;
   
   // Achievements
   achievements: Achievement[];
@@ -82,13 +84,14 @@ export function ContentProvider({ children }: { children: ReactNode }) {
           supabaseDb.getMilestones().catch((e) => { console.warn('Failed to load milestones:', e); return []; }),
         ]);
 
-        // Only update if we got data from Supabase (non-empty arrays)
-        if (Array.isArray(posts) && posts.length > 0) setBlogPosts(posts);
-        if (Array.isArray(images) && images.length > 0) setGalleryImages(images);
-        if (Array.isArray(achievementsData) && achievementsData.length > 0) setAchievements(achievementsData);
-        if (Array.isArray(testimonialsData) && testimonialsData.length > 0) setTestimonials(testimonialsData);
-        if (Array.isArray(timeline) && timeline.length > 0) setCareerTimeline(timeline);
-        if (Array.isArray(milestonesData) && milestonesData.length > 0) setMilestones(milestonesData);
+        // Always update with Supabase data if available (even if empty, to clear stale data)
+        // This ensures the latest data from Supabase is always used
+        if (Array.isArray(posts)) setBlogPosts(posts);
+        if (Array.isArray(images)) setGalleryImages(images);
+        if (Array.isArray(achievementsData)) setAchievements(achievementsData);
+        if (Array.isArray(testimonialsData)) setTestimonials(testimonialsData);
+        if (Array.isArray(timeline)) setCareerTimeline(timeline);
+        if (Array.isArray(milestonesData)) setMilestones(milestonesData);
       } catch (error) {
         console.warn('Error loading from Supabase (using localStorage):', error);
         // Continue with localStorage data - it's already loaded
@@ -114,6 +117,18 @@ export function ContentProvider({ children }: { children: ReactNode }) {
     setBlogPosts(prev => prev.filter(post => post.id !== id));
   };
 
+  const refreshBlogPosts = async () => {
+    if (!supabase) return;
+    try {
+      const posts = await supabaseDb.getBlogPosts();
+      if (Array.isArray(posts)) {
+        setBlogPosts(posts);
+      }
+    } catch (error) {
+      console.warn('Failed to refresh blog posts:', error);
+    }
+  };
+
   // Gallery Images
   const addGalleryImage = (image: GalleryImage) => {
     setGalleryImages(prev => [...prev, image]);
@@ -125,6 +140,18 @@ export function ContentProvider({ children }: { children: ReactNode }) {
 
   const deleteGalleryImage = (id: string) => {
     setGalleryImages(prev => prev.filter(image => image.id !== id));
+  };
+
+  const refreshGalleryImages = async () => {
+    if (!supabase) return;
+    try {
+      const images = await supabaseDb.getGalleryImages();
+      if (Array.isArray(images)) {
+        setGalleryImages(images);
+      }
+    } catch (error) {
+      console.warn('Failed to refresh gallery images:', error);
+    }
   };
 
   // Achievements
@@ -194,10 +221,12 @@ export function ContentProvider({ children }: { children: ReactNode }) {
     addBlogPost,
     updateBlogPost,
     deleteBlogPost,
+    refreshBlogPosts,
     galleryImages,
     addGalleryImage,
     updateGalleryImage,
     deleteGalleryImage,
+    refreshGalleryImages,
     achievements,
     addAchievement,
     updateAchievement,
