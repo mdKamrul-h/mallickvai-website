@@ -162,12 +162,17 @@ export async function createGalleryImage(image: Omit<GalleryImage, 'id' | 'creat
     const tagsArray = Array.isArray(image.tags) ? image.tags : (image.tags ? [image.tags] : []);
     
     // Prepare data for insert
-    const insertData = {
-      ...image,
+    // PostgreSQL converts unquoted column names to lowercase
+    // The error shows the column is "imageurl" (lowercase), so we need to match that
+    const insertData: any = {
       id: Date.now().toString(),
+      title: image.title || '',
+      description: image.description || '',
+      imageurl: image.imageUrl || '', // Use lowercase to match PostgreSQL's column name
+      category: image.category || '',
       tags: tagsArray,
-      description: image.description || '', // Ensure description is not null
-      date: image.date || new Date().toISOString().split('T')[0], // Ensure date is not null
+      date: image.date || new Date().toISOString().split('T')[0],
+      featured: image.featured || false,
     };
     
     const { data, error } = await supabase
@@ -213,9 +218,16 @@ export async function updateGalleryImage(id: string, updates: Partial<GalleryIma
     throw new Error('Supabase is not configured');
   }
   
+  // Convert imageUrl to imageurl (lowercase) for PostgreSQL
+  const updateData: any = { ...updates };
+  if ('imageUrl' in updateData) {
+    updateData.imageurl = updateData.imageUrl;
+    delete updateData.imageUrl;
+  }
+  
   const { data, error } = await supabase
     .from(TABLES.GALLERY_IMAGES)
-    .update(updates)
+    .update(updateData)
     .eq('id', id)
     .select()
     .single();
