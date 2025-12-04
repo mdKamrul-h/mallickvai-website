@@ -117,7 +117,8 @@ export function CampaignPage({ isModal = false, onClose }: CampaignPageProps) {
                 <ImageWithFallback
                   src={heroPortrait}
                   alt="M.M. Mallick Nazrul Islam"
-                  className="w-full h-[600px] object-cover"
+                  className="w-full h-[600px] object-cover object-top"
+                  style={{ objectPosition: 'center top' }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0A1A3A]/60 to-transparent"></div>
               </div>
