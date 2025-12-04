@@ -858,20 +858,12 @@ export function AdminGallery() {
                     accept="image/*"
                     multiple
                     onChange={handleBulkFileChange}
-                    className="absolute opacity-0 w-0 h-0"
-                    style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, overflow: 'hidden' }}
+                    className="sr-only"
                   />
                   <label
                     htmlFor="bulk-image-upload"
                     className="flex items-center justify-center gap-3 w-full px-6 py-4 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-[#C9A961] hover:bg-gray-50 active:bg-gray-100 transition-all touch-manipulation"
                     style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
-                    onClick={(e) => {
-                      // Ensure the input is triggered on mobile
-                      const input = document.getElementById('bulk-image-upload') as HTMLInputElement;
-                      if (input) {
-                        input.click();
-                      }
-                    }}
                   >
                     <Upload className="w-5 h-5 text-gray-400" />
                     <div className="text-center">
