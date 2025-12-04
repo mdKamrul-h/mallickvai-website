@@ -48,3 +48,4 @@ GRANT ALL ON gallery_images TO service_role;
 -- Note: This might require a Supabase restart or API reload
 NOTIFY pgrst, 'reload schema';
 
+

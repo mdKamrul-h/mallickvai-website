@@ -38,3 +38,4 @@ SELECT column_name, data_type, is_nullable
 FROM information_schema.columns 
 WHERE table_name = 'gallery_images' AND column_name = 'imageUrl';
 
+

@@ -22,6 +22,9 @@ export function AdminGallery() {
   const [bulkFiles, setBulkFiles] = useState<File[]>([]);
   const [bulkPreviews, setBulkPreviews] = useState<string[]>([]);
   const [bulkCategory, setBulkCategory] = useState('');
+  const [bulkCustomCategory, setBulkCustomCategory] = useState('');
+  const [singleCategory, setSingleCategory] = useState('');
+  const [singleCustomCategory, setSingleCustomCategory] = useState('');
   const [bulkProgress, setBulkProgress] = useState({ current: 0, total: 0 });
   const [isUploading, setIsUploading] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -152,8 +155,13 @@ export function AdminGallery() {
       return;
     }
     
-    if (!bulkCategory) {
-      alert('Please select a category');
+    // Determine the final category: use custom if "Other" is selected and custom name is provided
+    const finalCategory = bulkCategory === 'Other' && bulkCustomCategory.trim() 
+      ? bulkCustomCategory.trim() 
+      : bulkCategory;
+    
+    if (!finalCategory) {
+      alert('Please select a category or enter a custom category name');
       return;
     }
 
@@ -174,11 +182,16 @@ export function AdminGallery() {
             
             // Create gallery image data
             // Bulk upload: Keep title empty (user can edit later if needed)
+            // Determine the final category: use custom if "Other" is selected and custom name is provided
+            const finalCategory = bulkCategory === 'Other' && bulkCustomCategory.trim() 
+              ? bulkCustomCategory.trim() 
+              : bulkCategory;
+            
             const imageData: Omit<GalleryImage, 'id' | 'created_at' | 'updated_at'> = {
               title: '', // Empty title for bulk upload
               description: '',
               imageUrl: imageUrl,
-              category: bulkCategory,
+              category: finalCategory,
               tags: [],
               date: new Date().toISOString().split('T')[0], // Use current date
               featured: false,
@@ -215,6 +228,7 @@ export function AdminGallery() {
         setBulkFiles([]);
         setBulkPreviews([]);
         setBulkCategory('');
+        setBulkCustomCategory('');
         setShowBulkUpload(false);
         // Refresh gallery images from Supabase to ensure sync
         await refreshGalleryImages();
@@ -279,11 +293,22 @@ export function AdminGallery() {
       return;
     }
 
+    // Get the current category value (from state or form)
+    const formData = new FormData(e.currentTarget);
+    const formCategory = formData.get('category') as string;
+    const currentCategory = singleCategory || formCategory || editingImage?.category || '';
+    
+    // Validate custom category if "Other" is selected
+    if (currentCategory === 'Other') {
+      if (!singleCustomCategory.trim()) {
+        alert('Please enter a custom category/album name when "Other" is selected');
+        return;
+      }
+    }
+
     setIsUploading(true);
 
     try {
-      const formData = new FormData(e.currentTarget);
-      
       let imageUrl = editingImage?.imageUrl || '';
       
       // Upload new image to Supabase if a file was selected
@@ -310,11 +335,16 @@ export function AdminGallery() {
       }
       
       const tagsInput = (formData.get('tags') as string) || '';
+      // Determine the final category: use custom if "Other" is selected and custom name is provided
+      const finalCategory = currentCategory === 'Other' && singleCustomCategory.trim() 
+        ? singleCustomCategory.trim() 
+        : currentCategory;
+      
       const imageData: Omit<GalleryImage, 'id' | 'created_at' | 'updated_at'> = {
         title: formData.get('title') as string,
         description: (formData.get('description') as string) || '',
         imageUrl: imageUrl,
-        category: formData.get('category') as string,
+        category: finalCategory,
         tags: tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(t => t) : [],
         date: (formData.get('date') as string) || '',
         featured: formData.get('featured') === 'on',
@@ -345,6 +375,8 @@ export function AdminGallery() {
         setEditingImage(null);
         setSelectedFile(null);
         setPreviewUrl('');
+        setSingleCategory('');
+        setSingleCustomCategory('');
         setHasUnsavedChanges(true);
         setSaveSuccess(true);
         setTimeout(() => {
@@ -367,6 +399,16 @@ export function AdminGallery() {
   const handleEdit = (image: GalleryImage) => {
     setEditingImage(image);
     setShowForm(true);
+    // Check if the category is in the predefined list
+    const predefinedCategories = ['Community', 'Professional', 'Events', 'Awards', 'Leadership', 'CNBL', 'Batch Reunions', 'Conferences'];
+    if (predefinedCategories.includes(image.category)) {
+      setSingleCategory(image.category);
+      setSingleCustomCategory('');
+    } else {
+      // It's a custom category, set to "Other" and use the category as custom
+      setSingleCategory('Other');
+      setSingleCustomCategory(image.category);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -448,6 +490,9 @@ export function AdminGallery() {
                   setBulkFiles([]);
                   setBulkPreviews([]);
                   setBulkCategory('');
+                  setBulkCustomCategory('');
+                  setSingleCategory('');
+                  setSingleCustomCategory('');
                 }}
                 variant="outline"
                 className="font-['Inter']"
@@ -536,7 +581,14 @@ export function AdminGallery() {
                     <select
                       name="category"
                       required
-                      defaultValue={editingImage?.category || ''}
+                      value={singleCategory || editingImage?.category || ''}
+                      onChange={(e) => {
+                        setSingleCategory(e.target.value);
+                        // Reset custom category if not "Other"
+                        if (e.target.value !== 'Other') {
+                          setSingleCustomCategory('');
+                        }
+                      }}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg font-['Inter'] focus:outline-none focus:ring-2 focus:ring-[#C9A961]"
                     >
                       <option value="">Select Category</option>
@@ -545,10 +597,33 @@ export function AdminGallery() {
                       <option value="Events">Events</option>
                       <option value="Awards">Awards</option>
                       <option value="Leadership">Leadership</option>
+                      <option value="CNBL">CNBL</option>
+                      <option value="Batch Reunions">Batch Reunions</option>
+                      <option value="Conferences">Conferences</option>
                       <option value="Other">Other</option>
                     </select>
                   </div>
                 </div>
+                
+                {/* Custom Category Input - shown when "Other" is selected */}
+                {singleCategory === 'Other' && (
+                  <div>
+                    <label className="block text-sm font-['Inter'] font-medium text-gray-700 mb-2">
+                      Custom Category/Album Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={singleCustomCategory}
+                      onChange={(e) => setSingleCustomCategory(e.target.value)}
+                      placeholder="Enter new category/album name"
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg font-['Inter'] focus:outline-none focus:ring-2 focus:ring-[#C9A961]"
+                    />
+                    <p className="text-xs text-gray-500 font-['Inter'] mt-1">
+                      Enter a name for your new category/album
+                    </p>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-['Inter'] font-medium text-gray-700 mb-2">
@@ -728,7 +803,13 @@ export function AdminGallery() {
                 </label>
                 <select
                   value={bulkCategory}
-                  onChange={(e) => setBulkCategory(e.target.value)}
+                  onChange={(e) => {
+                    setBulkCategory(e.target.value);
+                    // Reset custom category if not "Other"
+                    if (e.target.value !== 'Other') {
+                      setBulkCustomCategory('');
+                    }
+                  }}
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg font-['Inter'] focus:outline-none focus:ring-2 focus:ring-[#C9A961]"
                 >
@@ -746,6 +827,26 @@ export function AdminGallery() {
                 <p className="text-xs text-gray-500 font-['Inter'] mt-1">
                   All selected images will be added to this album/category. Images will be uploaded without titles (you can add titles later by editing individual images).
                 </p>
+                
+                {/* Custom Category Input - shown when "Other" is selected */}
+                {bulkCategory === 'Other' && (
+                  <div className="mt-4">
+                    <label className="block text-sm font-['Inter'] font-medium text-gray-700 mb-2">
+                      Custom Category/Album Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={bulkCustomCategory}
+                      onChange={(e) => setBulkCustomCategory(e.target.value)}
+                      placeholder="Enter new category/album name"
+                      required={bulkCategory === 'Other'}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg font-['Inter'] focus:outline-none focus:ring-2 focus:ring-[#C9A961]"
+                    />
+                    <p className="text-xs text-gray-500 font-['Inter'] mt-1">
+                      Enter a name for your new category/album
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* File Upload Input */}
@@ -850,7 +951,12 @@ export function AdminGallery() {
               <div className="flex gap-4">
                 <Button
                   onClick={handleBulkUpload}
-                  disabled={isUploading || bulkFiles.length === 0 || !bulkCategory}
+                  disabled={
+                    isUploading || 
+                    bulkFiles.length === 0 || 
+                    !bulkCategory || 
+                    (bulkCategory === 'Other' && !bulkCustomCategory.trim())
+                  }
                   className="font-['Inter']"
                   style={{ background: 'linear-gradient(135deg, #C9A961 0%, #B76E79 100%)' }}
                 >
