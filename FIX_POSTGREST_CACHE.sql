@@ -49,3 +49,4 @@ GRANT ALL ON gallery_images TO service_role;
 NOTIFY pgrst, 'reload schema';
 
 
+

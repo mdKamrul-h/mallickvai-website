@@ -60,3 +60,4 @@ CREATE POLICY "Allow delete" ON gallery_images
 SELECT 'Table and policies created successfully!' as status;
 
 
+
