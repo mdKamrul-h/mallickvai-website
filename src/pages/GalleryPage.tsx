@@ -71,6 +71,7 @@ export function GalleryPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [lightboxImage, setLightboxImage] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'masonry'>('masonry');
+  const [visibleCount, setVisibleCount] = useState(12); // Show 12 photos initially
   
   // Transform gallery images from ContentContext to photos format
   const photos = galleryImages.length > 0 
@@ -115,6 +116,20 @@ export function GalleryPage() {
   const filteredPhotos = selectedCategory === 'All' 
     ? photos 
     : photos.filter(photo => photo.category === selectedCategory);
+
+  // Reset visible count when category changes
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [selectedCategory]);
+
+  // Get visible photos based on pagination
+  const visiblePhotos = filteredPhotos.slice(0, visibleCount);
+  const hasMorePhotos = filteredPhotos.length > visibleCount;
+
+  // Load more photos handler
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + 12);
+  };
 
   return (
     <div className="bg-[#FAFAF9]">
@@ -196,7 +211,7 @@ export function GalleryPage() {
       <section className="py-12 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPhotos.map((photo) => (
+            {visiblePhotos.map((photo) => (
               <Card
                 key={photo.id}
                 className="overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group"
@@ -228,9 +243,32 @@ export function GalleryPage() {
             ))}
           </div>
 
-          <div className="text-center mt-12">
-            <Button variant="outline" size="lg">Load More Photos</Button>
-          </div>
+          {hasMorePhotos && (
+            <div className="text-center mt-12">
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={handleLoadMore}
+                className="px-8 py-6 rounded-xl font-['Inter'] font-semibold transition-all duration-300 hover:scale-105"
+                style={{
+                  borderColor: '#C9A961',
+                  color: '#0A1929'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #C9A961 0%, #B76E79 100%)';
+                  e.currentTarget.style.color = '#FFFFFF';
+                  e.currentTarget.style.borderColor = 'transparent';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = '#0A1929';
+                  e.currentTarget.style.borderColor = '#C9A961';
+                }}
+              >
+                Load More Photos ({filteredPhotos.length - visibleCount} remaining)
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 

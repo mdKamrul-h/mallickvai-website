@@ -376,93 +376,158 @@ export function ArticleDetailPage() {
       </section>
 
       {/* Article Footer */}
-      <section className="bg-[#F5F5F5] py-[60px]">
-        <div className="max-w-[750px] mx-auto px-[15%]">
-          {/* Tags */}
-          <div className="mb-10">
-            <span style={{
-              fontFamily: 'Montserrat, sans-serif',
-              fontWeight: 'bold',
-              fontSize: '16px',
-              color: '#003366',
-              marginRight: '16px'
-            }}>
-              Tags:
-            </span>
-            {tags.map((tag, idx) => (
-              <button
-                key={idx}
-                className="inline-block px-5 py-2 bg-white border-2 border-[#E0E0E0] rounded-[20px] text-[#666666] mr-2 mb-2 transition-all duration-300 hover:border-[#003366] hover:text-[#003366] hover:bg-[#E6F2FF] cursor-pointer"
-                style={{
-                  fontFamily: 'Open Sans, sans-serif',
-                  fontWeight: '600',
-                  fontSize: '13px'
-                }}
-              >
-                {tag}
-              </button>
-            ))}
+      <section className="bg-gradient-to-br from-gray-50 via-white to-gray-50 py-12 md:py-16">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          {/* Tags Section - Redesigned */}
+          <div className="mb-12 md:mb-16">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-1 w-12 bg-gradient-to-r from-[#C9A961] to-[#B76E79] rounded-full"></div>
+              <h3 className="text-[#0A1929] font-['Montserrat'] font-bold text-xl md:text-2xl">
+                Topics & Tags
+              </h3>
+              <div className="h-1 flex-1 bg-gradient-to-r from-[#B76E79] to-[#C9A961] rounded-full"></div>
+            </div>
+            <div className="flex flex-wrap gap-3 md:gap-4">
+              {tags.map((tag, idx) => (
+                <button
+                  key={idx}
+                  className="group relative px-6 py-3 rounded-full font-['Inter'] font-semibold text-sm md:text-base transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                  style={{
+                    background: 'linear-gradient(135deg, #0A1929 0%, #1A2942 100%)',
+                    color: '#C9A961',
+                    border: '2px solid transparent'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #C9A961 0%, #B76E79 100%)';
+                    e.currentTarget.style.color = '#FFFFFF';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #0A1929 0%, #1A2942 100%)';
+                    e.currentTarget.style.color = '#C9A961';
+                  }}
+                >
+                  <span className="relative z-10">#{tag}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="h-[2px] bg-[#E0E0E0] my-10"></div>
+          {/* About the Author Section - Redesigned */}
+          <div className="relative">
+            {/* Decorative Background Elements */}
+            <div className="absolute inset-0 opacity-5">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-[#C9A961] to-[#B76E79] rounded-full blur-3xl"></div>
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-br from-[#B76E79] to-[#C9A961] rounded-full blur-3xl"></div>
+            </div>
 
-          {/* About the Author */}
-          <Card className="p-6 md:p-10 bg-white rounded-xl shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
-            <CardContent className="p-0">
-              <h3 style={{
-                fontFamily: 'Montserrat, sans-serif',
-                fontWeight: 'bold',
-                fontSize: '20px',
-                color: '#003366',
-                marginBottom: '24px'
-              }}>
-                About the Author
-              </h3>
-              <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6 md:gap-8">
-                <img
-                  src={profileImage}
-                  alt="Author"
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-[#D4AF37] flex-shrink-0 mx-auto sm:mx-0"
-                />
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-lg sm:text-xl md:text-2xl font-bold text-[#003366] mb-2 sm:mb-3 break-words" style={{
-                    fontFamily: 'Montserrat, sans-serif'
-                  }}>
-                    Engr. M M Nazrul Islam
-                  </h4>
-                  <p className="text-sm sm:text-base text-[#666666] leading-relaxed mb-4 sm:mb-5 break-words" style={{
-                    fontFamily: 'Open Sans, sans-serif',
-                    lineHeight: '1.7'
-                  }}>
-                    Sr. GM Operations at Lantabur Group, CNBL leader, and Notre Dame College alumnus (Batch '99). Passionate about operational excellence and community building.
-                  </p>
-                  <div className="flex flex-wrap gap-3 sm:gap-4">
-                    <Link
-                      to="/professional"
-                      className="text-[#D4AF37] hover:underline whitespace-nowrap inline-flex items-center gap-1"
-                      style={{
-                        fontFamily: 'Open Sans, sans-serif',
-                        fontWeight: '600',
-                        fontSize: '15px'
-                      }}
-                    >
-                      View Profile →
-                    </Link>
-                    <button
-                      className="text-[#003366] hover:underline whitespace-nowrap"
-                      style={{
-                        fontFamily: 'Open Sans, sans-serif',
-                        fontWeight: '600',
-                        fontSize: '15px'
-                      }}
-                    >
-                      Follow
-                    </button>
+            <Card className="relative overflow-hidden border-0 shadow-2xl" style={{
+              background: 'linear-gradient(135deg, #FFFFFF 0%, #FAFAF9 100%)'
+            }}>
+              <CardContent className="p-0">
+                {/* Header with Gradient Accent */}
+                <div className="relative h-2 bg-gradient-to-r from-[#C9A961] via-[#B76E79] to-[#C9A961]"></div>
+                
+                <div className="p-8 md:p-12">
+                  {/* Section Title */}
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{
+                      background: 'linear-gradient(135deg, #C9A961 0%, #B76E79 100%)'
+                    }}>
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                    <h3 className="text-[#0A1929] font-['Montserrat'] font-bold text-2xl md:text-3xl">
+                      About the Author
+                    </h3>
+                  </div>
+
+                  {/* Author Content */}
+                  <div className="flex flex-col md:flex-row items-start gap-6 md:gap-8">
+                    {/* Profile Image with Enhanced Styling */}
+                    <div className="relative flex-shrink-0 mx-auto md:mx-0">
+                      <div className="relative w-24 h-24 md:w-32 md:h-32">
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-[#C9A961] to-[#B76E79] p-1 animate-pulse"></div>
+                        <div className="relative w-full h-full rounded-full overflow-hidden border-4 border-white shadow-xl">
+                          <img
+                            src={profileImage}
+                            alt="Author"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br from-[#C9A961] to-[#B76E79] flex items-center justify-center border-4 border-white shadow-lg">
+                          <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Author Info */}
+                    <div className="flex-1 min-w-0 text-center md:text-left">
+                      <h4 className="text-[#0A1929] font-['Montserrat'] font-bold text-2xl md:text-3xl mb-3 break-words">
+                        Engr. M M Nazrul Islam
+                      </h4>
+                      
+                      {/* Author Title Badge */}
+                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-4" style={{
+                        background: 'linear-gradient(135deg, rgba(201, 169, 97, 0.1) 0%, rgba(183, 110, 121, 0.1) 100%)',
+                        border: '1px solid rgba(201, 169, 97, 0.3)'
+                      }}>
+                        <span className="text-[#0A1929] font-['Inter'] font-semibold text-sm md:text-base">
+                          Sr. GM Operations | Lantabur Group
+                        </span>
+                      </div>
+
+                      {/* Author Bio */}
+                      <p className="text-[#64748B] font-['Inter'] text-base md:text-lg leading-relaxed mb-6 break-words">
+                        CNBL leader and Notre Dame College alumnus (Batch '99). With over 25 years of experience in operations management, leading a workforce of 9,700+ and achieving $27M monthly shipments. Passionate about operational excellence, community building, and mentoring the next generation of leaders.
+                      </p>
+
+                      {/* Action Buttons */}
+                      <div className="flex flex-wrap gap-3 md:gap-4 justify-center md:justify-start">
+                        <Link
+                          to="/professional"
+                          className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl font-['Inter'] font-semibold text-sm md:text-base transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                          style={{
+                            background: 'linear-gradient(135deg, #C9A961 0%, #B76E79 100%)',
+                            color: '#FFFFFF'
+                          }}
+                        >
+                          <span>View Full Profile</span>
+                          <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                          </svg>
+                        </Link>
+                        <Link
+                          to="/contact"
+                          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-['Inter'] font-semibold text-sm md:text-base transition-all duration-300 hover:scale-105 border-2"
+                          style={{
+                            borderColor: '#C9A961',
+                            color: '#0A1929',
+                            background: 'transparent'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'linear-gradient(135deg, #C9A961 0%, #B76E79 100%)';
+                            e.currentTarget.style.color = '#FFFFFF';
+                            e.currentTarget.style.borderColor = 'transparent';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'transparent';
+                            e.currentTarget.style.color = '#0A1929';
+                            e.currentTarget.style.borderColor = '#C9A961';
+                          }}
+                        >
+                          <Mail className="w-4 h-4" />
+                          <span>Get in Touch</span>
+                        </Link>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </section>
 

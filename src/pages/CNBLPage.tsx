@@ -3,8 +3,17 @@ import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { Link } from 'react-router-dom';
+import { useContent } from '../contexts/ContentContext';
 
 export function CNBLPage() {
+  const { galleryImages } = useContent();
+  
+  // Get CNBL category images from gallery
+  const cnblImages = galleryImages.filter(img => 
+    img.category.toLowerCase() === 'cnbl' || 
+    img.category.toLowerCase() === 'community' ||
+    img.tags?.some(tag => tag.toLowerCase().includes('cnbl'))
+  ).slice(0, 6); // Get first 6 CNBL images
   const pillars = [
     {
       icon: Calendar,
@@ -254,25 +263,41 @@ export function CNBLPage() {
         <div className="container mx-auto px-4 max-w-6xl">
           <h2 className="text-center mb-12 text-[#003366]">Event Gallery</h2>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((idx) => (
-              <div key={idx} className="aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow">
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1762006222425-cb6e6b5045f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb21tdW5pdHklMjBnYXRoZXJpbmclMjBjZWxlYnJhdGlvbnxlbnwxfHx8fDE3NjM4NzcwNzl8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                  alt={`CNBL Event ${idx}`}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
+          {cnblImages.length > 0 ? (
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {cnblImages.map((img) => (
+                  <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow group">
+                    <ImageWithFallback
+                      src={img.imageUrl}
+                      alt={img.title}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                      <p className="text-white text-sm font-semibold line-clamp-2">{img.title}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          <div className="text-center mt-8">
-            <Link to="/gallery">
-              <Button className="bg-[#003366] hover:bg-[#004488]">
-                View Full Gallery <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
+              <div className="text-center mt-8">
+                <Link to="/gallery">
+                  <Button className="bg-[#003366] hover:bg-[#004488]">
+                    View Full Gallery <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500 mb-4">No CNBL gallery images available yet.</p>
+              <Link to="/gallery">
+                <Button className="bg-[#003366] hover:bg-[#004488]">
+                  View Full Gallery <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
