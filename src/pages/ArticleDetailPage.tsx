@@ -38,11 +38,15 @@ export function ArticleDetailPage() {
 
   // Wait for blogPosts to load, then check if post exists
   useEffect(() => {
+    console.log('ArticleDetailPage - slug:', slug);
+    console.log('ArticleDetailPage - blogPosts count:', blogPosts.length);
+    console.log('ArticleDetailPage - blogPosts:', blogPosts.map(p => ({ title: p.title, slug: generateSlug(p.title) })));
+    
     // If blogPosts is still empty, wait a bit more
     if (blogPosts.length === 0) {
       const timer = setTimeout(() => {
         setIsLoading(false);
-      }, 500);
+      }, 1000); // Increased timeout
       return () => clearTimeout(timer);
     }
     
@@ -52,12 +56,12 @@ export function ArticleDetailPage() {
     if (slug && blogPosts.length > 0 && !blogPost) {
       console.warn(`Blog post with slug "${slug}" not found. Available slugs:`, 
         blogPosts.map(p => generateSlug(p.title)));
-      navigate('/blog');
+      // Don't redirect immediately, show error message instead
     }
   }, [slug, blogPost, blogPosts, navigate]);
 
   // Show loading state while blogPosts are being fetched
-  if (isLoading || blogPosts.length === 0) {
+  if (isLoading) {
     return (
       <div className="bg-white min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -68,12 +72,57 @@ export function ArticleDetailPage() {
     );
   }
 
+  // Show error if blogPosts loaded but post not found
+  if (blogPosts.length > 0 && !blogPost && slug) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center max-w-2xl mx-auto px-4">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Post not found</h1>
+          <p className="text-gray-600 mb-4 font-['Inter']">
+            The article with slug "{slug}" doesn't exist.
+          </p>
+          <p className="text-sm text-gray-500 mb-6 font-['Inter']">
+            Available posts: {blogPosts.length}
+          </p>
+          <Link to="/blog" className="text-blue-600 hover:underline font-['Inter']">Return to Blog</Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading if blogPosts haven't loaded yet
+  if (blogPosts.length === 0) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C9A961] mx-auto mb-4"></div>
+          <p className="text-gray-600 font-['Inter']">Loading blog posts...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Safety check - if we still don't have blogPost, show error
   if (!blogPost) {
     return (
       <div className="bg-white min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Post not found</h1>
           <p className="text-gray-600 mb-4 font-['Inter']">The article you're looking for doesn't exist.</p>
+          <Link to="/blog" className="text-blue-600 hover:underline font-['Inter']">Return to Blog</Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Validate required fields
+  if (!blogPost.title || !blogPost.content) {
+    console.error('Blog post missing required fields:', blogPost);
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-800 mb-4">Invalid Post Data</h1>
+          <p className="text-gray-600 mb-4 font-['Inter']">This post is missing required information.</p>
           <Link to="/blog" className="text-blue-600 hover:underline font-['Inter']">Return to Blog</Link>
         </div>
       </div>
@@ -91,14 +140,16 @@ export function ArticleDetailPage() {
   };
 
   // Calculate read time (rough estimate: 200 words per minute)
-  const calculateReadTime = (content: string) => {
-    const words = content.split(/\s+/).length;
-    const minutes = Math.ceil(words / 200);
+  const calculateReadTime = (content: string | undefined) => {
+    if (!content || content.trim().length === 0) return '1 min read';
+    const words = content.split(/\s+/).filter(w => w.length > 0).length;
+    const minutes = Math.max(1, Math.ceil(words / 200));
     return `${minutes} min read`;
   };
 
   // Get related articles (other published posts from same category, excluding current)
   const relatedArticles = useMemo(() => {
+    if (!blogPost) return [];
     return blogPosts
       .filter(post => post.published && post.id !== blogPost.id && post.category === blogPost.category)
       .slice(0, 3)
@@ -108,12 +159,18 @@ export function ArticleDetailPage() {
         excerpt: post.excerpt,
         category: post.category,
         date: formatDate(post.date),
-        readTime: calculateReadTime(post.content),
-        slug: post.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+        readTime: calculateReadTime(post.content || ''),
+        slug: generateSlug(post.title)
       }));
   }, [blogPosts, blogPost]);
 
-  const tags = blogPost.tags || [blogPost.category];
+  const tags = blogPost.tags || [blogPost.category || 'Uncategorized'];
+
+  // Ensure content exists
+  const content = blogPost.content || '';
+  const imageUrl = blogPost.imageUrl || '';
+  const author = blogPost.author || 'Unknown Author';
+  const excerpt = blogPost.excerpt || '';
 
   return (
     <div className="bg-white">
@@ -121,9 +178,10 @@ export function ArticleDetailPage() {
       <section
         className="relative h-[600px] flex flex-col justify-center px-4 md:px-[15%] py-[120px]"
         style={{
-          backgroundImage: `url(${blogPost.imageUrl})`,
+          backgroundImage: imageUrl ? `url(${imageUrl})` : 'none',
           backgroundSize: 'cover',
-          backgroundPosition: 'center'
+          backgroundPosition: 'center',
+          backgroundColor: imageUrl ? 'transparent' : '#0A1929'
         }}
       >
         <div className="absolute inset-0 bg-[rgba(0,51,102,0.7)]"></div>
@@ -178,7 +236,7 @@ export function ArticleDetailPage() {
               lineHeight: '1.6'
             }}
           >
-            {blogPost.excerpt}
+            {excerpt}
           </p>
 
           {/* Author & Meta */}
@@ -197,7 +255,7 @@ export function ArticleDetailPage() {
                   fontSize: '16px'
                 }}
               >
-                By {blogPost.author}
+                By {author}
               </span>
             </div>
             <div className="flex items-center gap-6 text-[rgba(255,255,255,0.9)]" style={{
@@ -208,7 +266,7 @@ export function ArticleDetailPage() {
                 <Calendar className="w-4 h-4" /> {formatDate(blogPost.date)}
               </span>
               <span className="flex items-center gap-2">
-                <Clock className="w-4 h-4" /> {calculateReadTime(blogPost.content)}
+                <Clock className="w-4 h-4" /> {calculateReadTime(content)}
               </span>
             </div>
           </div>
@@ -229,9 +287,11 @@ export function ArticleDetailPage() {
                 lineHeight: '1.9'
               }}
             >
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
+              {content ? (
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  children={content}
+                  components={{
                   // Custom styling for headings
                   h1: ({node, ...props}) => (
                     <h1 style={{
@@ -446,9 +506,12 @@ export function ArticleDetailPage() {
                     }} {...props} />
                   )
                 }}
-              >
-                {blogPost.content}
-              </ReactMarkdown>
+              />
+              ) : (
+                <div className="text-gray-500 font-['Inter']">
+                  <p>No content available for this article.</p>
+                </div>
+              )}
             </div>
           </article>
 
