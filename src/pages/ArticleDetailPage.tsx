@@ -47,11 +47,29 @@ export function ArticleDetailPage() {
     if (!slug) return null;
     
     const normalizedSlug = slug.toLowerCase().trim();
+    console.log('🔍 Searching for blog post with slug:', normalizedSlug);
+    console.log('📚 Available blog posts:', blogPosts.length);
     
-    return blogPosts.find(post => {
+    const found = blogPosts.find(post => {
+      if (!post.title) return false;
       const postSlug = generateSlug(post.title);
-      return postSlug === normalizedSlug;
+      const matches = postSlug === normalizedSlug;
+      if (matches) {
+        console.log('✅ Found matching post:', post.title);
+      }
+      return matches;
     });
+    
+    if (!found) {
+      console.warn('❌ No matching post found. Generated slugs from titles:');
+      blogPosts.forEach(post => {
+        if (post.title) {
+          console.log(`  - "${post.title}" → "${generateSlug(post.title)}"`);
+        }
+      });
+    }
+    
+    return found || null;
   }, [slug, blogPosts]);
 
   // Get related articles (other published posts from same category, excluding current)
@@ -79,25 +97,31 @@ export function ArticleDetailPage() {
 
   // Wait for blogPosts to load, then check if post exists
   useEffect(() => {
-    console.log('ArticleDetailPage - slug:', slug);
-    console.log('ArticleDetailPage - blogPosts count:', blogPosts.length);
-    console.log('ArticleDetailPage - blogPosts:', blogPosts.map(p => ({ title: p.title, slug: generateSlug(p.title) })));
+    console.log('🚀 ArticleDetailPage mounted/updated');
+    console.log('📍 Current slug from URL:', slug);
+    console.log('📊 Blog posts loaded:', blogPosts.length);
+    
+    if (blogPosts.length > 0) {
+      console.log('📝 Blog post titles:', blogPosts.map(p => p.title));
+    }
     
     // If blogPosts is still empty, wait a bit more
     if (blogPosts.length === 0) {
+      console.log('⏳ Waiting for blog posts to load...');
       const timer = setTimeout(() => {
+        console.log('⏰ Timeout reached, blogPosts still empty');
         setIsLoading(false);
-      }, 1000); // Increased timeout
+      }, 2000); // Increased timeout to 2 seconds
       return () => clearTimeout(timer);
     }
     
     setIsLoading(false);
+    console.log('✅ Blog posts loaded, blogPost found:', !!blogPost);
     
     // Only redirect if we have blogPosts loaded and still can't find the post
     if (slug && blogPosts.length > 0 && !blogPost) {
-      console.warn(`Blog post with slug "${slug}" not found. Available slugs:`, 
-        blogPosts.map(p => generateSlug(p.title)));
-      // Don't redirect immediately, show error message instead
+      console.error(`❌ Blog post with slug "${slug}" not found!`);
+      console.log('Available slugs:', blogPosts.map(p => p.title ? generateSlug(p.title) : 'NO TITLE'));
     }
   }, [slug, blogPost, blogPosts, navigate]);
 
@@ -115,17 +139,41 @@ export function ArticleDetailPage() {
 
   // Show error if blogPosts loaded but post not found
   if (blogPosts.length > 0 && !blogPost && slug) {
+    const availableSlugs = blogPosts
+      .filter(p => p.title)
+      .map(p => ({ title: p.title, slug: generateSlug(p.title) }));
+    
     return (
-      <div className="bg-white min-h-screen flex items-center justify-center">
+      <div className="bg-white min-h-screen flex items-center justify-center py-12">
         <div className="text-center max-w-2xl mx-auto px-4">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Post not found</h1>
           <p className="text-gray-600 mb-4 font-['Inter']">
-            The article with slug "{slug}" doesn't exist.
+            The article with slug <code className="bg-gray-100 px-2 py-1 rounded">"{slug}"</code> doesn't exist.
           </p>
-          <p className="text-sm text-gray-500 mb-6 font-['Inter']">
-            Available posts: {blogPosts.length}
-          </p>
-          <Link to="/blog" className="text-blue-600 hover:underline font-['Inter']">Return to Blog</Link>
+          <div className="text-sm text-gray-500 mb-6 font-['Inter'] text-left bg-gray-50 p-4 rounded-lg">
+            <p className="font-semibold mb-2">Available posts ({blogPosts.length}):</p>
+            <ul className="list-disc list-inside space-y-1">
+              {availableSlugs.slice(0, 10).map((item, idx) => (
+                <li key={idx}>
+                  <Link to={`/blog/${item.slug}`} className="text-blue-600 hover:underline">
+                    {item.title}
+                  </Link>
+                  <span className="text-gray-400 text-xs ml-2">({item.slug})</span>
+                </li>
+              ))}
+            </ul>
+            {availableSlugs.length > 10 && (
+              <p className="text-xs text-gray-400 mt-2">... and {availableSlugs.length - 10} more</p>
+            )}
+          </div>
+          <div className="flex gap-4 justify-center">
+            <Link to="/blog" className="text-blue-600 hover:underline font-['Inter'] font-semibold">
+              ← Return to Blog
+            </Link>
+            <Link to="/profile" className="text-blue-600 hover:underline font-['Inter'] font-semibold">
+              ← Go to Profile
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -172,11 +220,19 @@ export function ArticleDetailPage() {
 
   const tags = blogPost.tags || [blogPost.category || 'Uncategorized'];
 
-  // Ensure content exists
+  // Ensure content exists - this is the main blog text from Supabase
   const content = blogPost.content || '';
   const imageUrl = blogPost.imageUrl || '';
   const author = blogPost.author || 'Unknown Author';
   const excerpt = blogPost.excerpt || '';
+  
+  // Debug logging for content
+  console.log('📄 Blog post content:', {
+    hasContent: !!content,
+    contentLength: content.length,
+    contentPreview: content.substring(0, 100) + (content.length > 100 ? '...' : ''),
+    title: blogPost.title
+  });
 
   return (
     <div className="bg-white">
@@ -293,7 +349,7 @@ export function ArticleDetailPage() {
                 lineHeight: '1.9'
               }}
             >
-              {content ? (
+              {content && content.trim().length > 0 ? (
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   children={content}
@@ -514,8 +570,15 @@ export function ArticleDetailPage() {
                 }}
               />
               ) : (
-                <div className="text-gray-500 font-['Inter']">
-                  <p>No content available for this article.</p>
+                <div className="text-center py-12 text-gray-500 font-['Inter']">
+                  <p className="text-lg mb-4">⚠️ No content available for this article.</p>
+                  <p className="text-sm">The content field is empty. Please add content through the admin panel.</p>
+                  <Link 
+                    to="/admin/blog" 
+                    className="inline-block mt-4 text-blue-600 hover:underline font-semibold"
+                  >
+                    Go to Admin Blog Editor →
+                  </Link>
                 </div>
               )}
             </div>

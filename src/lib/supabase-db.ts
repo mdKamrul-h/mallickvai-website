@@ -49,6 +49,19 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
       return [];
     }
     
+    // Verify content field is present
+    if (data && data.length > 0) {
+      console.log('✅ Blog posts fetched from Supabase:', data.length);
+      data.forEach((post, idx) => {
+        console.log(`  Post ${idx + 1}:`, {
+          title: post.title,
+          hasContent: !!post.content,
+          contentLength: post.content?.length || 0,
+          published: post.published
+        });
+      });
+    }
+    
     return data || [];
   } catch (error) {
     console.warn('Exception fetching blog posts:', error);

@@ -22,9 +22,18 @@ export function HomePage() {
   }, []);
 
   // Get published and featured content
-  const publishedBlogPosts = blogPosts.filter(post => post.published);
+  // Note: If published is undefined, treat it as true (for backward compatibility)
+  const publishedBlogPosts = blogPosts.filter(post => post.published !== false);
   const featuredBlogPosts = publishedBlogPosts.filter(post => post.featured).slice(0, 3);
   const displayBlogPosts = featuredBlogPosts.length > 0 ? featuredBlogPosts : publishedBlogPosts.slice(0, 3);
+  
+  console.log('📰 HomePage - Blog posts:', {
+    total: blogPosts.length,
+    published: publishedBlogPosts.length,
+    featured: featuredBlogPosts.length,
+    displaying: displayBlogPosts.length,
+    posts: displayBlogPosts.map(p => ({ title: p.title, published: p.published, featured: p.featured }))
+  });
   
   // Get 5 most recent gallery images (sorted by created_at, then by date)
   const recentGalleryImages = [...galleryImages]
@@ -446,10 +455,18 @@ export function HomePage() {
             {displayBlogPosts.map((blog) => {
               // Generate slug from title (consistent with ArticleDetailPage)
               const slug = blog.title
-                .toLowerCase()
-                .trim()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/(^-|-$)/g, '');
+                ? blog.title
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/(^-|-$)/g, '')
+                : `blog-${blog.id}`;
+              
+              console.log('🔗 HomePage: Linking to blog:', {
+                title: blog.title,
+                slug: slug,
+                id: blog.id
+              });
               
               return (
                 <Link key={blog.id} to={`/blog/${slug}`} className="block">
