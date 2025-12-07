@@ -13,34 +13,68 @@ export function ArticleDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { blogPosts } = useContent();
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Helper function to generate slug from title (consistent with HomePage)
+  const generateSlug = (title: string): string => {
+    return title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  };
 
   // Find blog post by slug
   const blogPost = useMemo(() => {
     if (!slug) return null;
     
+    const normalizedSlug = slug.toLowerCase().trim();
+    
     return blogPosts.find(post => {
-      const postSlug = post.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-      return postSlug === slug;
+      const postSlug = generateSlug(post.title);
+      return postSlug === normalizedSlug;
     });
   }, [slug, blogPosts]);
 
-  // Redirect to blog page if post not found
+  // Wait for blogPosts to load, then check if post exists
   useEffect(() => {
-    if (slug && !blogPost) {
-      console.warn(`Blog post with slug "${slug}" not found`);
+    // If blogPosts is still empty, wait a bit more
+    if (blogPosts.length === 0) {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+    
+    setIsLoading(false);
+    
+    // Only redirect if we have blogPosts loaded and still can't find the post
+    if (slug && blogPosts.length > 0 && !blogPost) {
+      console.warn(`Blog post with slug "${slug}" not found. Available slugs:`, 
+        blogPosts.map(p => generateSlug(p.title)));
       navigate('/blog');
     }
-  }, [slug, blogPost, navigate]);
+  }, [slug, blogPost, blogPosts, navigate]);
+
+  // Show loading state while blogPosts are being fetched
+  if (isLoading || blogPosts.length === 0) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#C9A961] mx-auto mb-4"></div>
+          <p className="text-gray-600 font-['Inter']">Loading article...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!blogPost) {
     return (
       <div className="bg-white min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800 mb-4">Post not found</h1>
-          <Link to="/blog" className="text-blue-600 hover:underline">Return to Blog</Link>
+          <p className="text-gray-600 mb-4 font-['Inter']">The article you're looking for doesn't exist.</p>
+          <Link to="/blog" className="text-blue-600 hover:underline font-['Inter']">Return to Blog</Link>
         </div>
       </div>
     );

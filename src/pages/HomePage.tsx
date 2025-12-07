@@ -444,9 +444,10 @@ export function HomePage() {
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
             {displayBlogPosts.map((blog) => {
-              // Generate slug from title
+              // Generate slug from title (consistent with ArticleDetailPage)
               const slug = blog.title
                 .toLowerCase()
+                .trim()
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/(^-|-$)/g, '');
               

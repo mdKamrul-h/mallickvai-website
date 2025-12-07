@@ -63,7 +63,7 @@ export function LeadershipPage() {
         date: formatDate(post.date),
         readTime: calculateReadTime(post.content),
         category: post.category,
-        slug: post.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+        slug: post.title.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
       }));
 
     // Fallback to default insights if no blog posts found
