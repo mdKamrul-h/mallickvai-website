@@ -24,6 +24,24 @@ export function ArticleDetailPage() {
       .replace(/(^-|-$)/g, '');
   };
 
+  // Format date helper
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    } catch {
+      return dateString;
+    }
+  };
+
+  // Calculate read time helper
+  const calculateReadTime = (content: string | undefined) => {
+    if (!content || content.trim().length === 0) return '1 min read';
+    const words = content.split(/\s+/).filter(w => w.length > 0).length;
+    const minutes = Math.max(1, Math.ceil(words / 200));
+    return `${minutes} min read`;
+  };
+
   // Find blog post by slug
   const blogPost = useMemo(() => {
     if (!slug) return null;
@@ -35,6 +53,29 @@ export function ArticleDetailPage() {
       return postSlug === normalizedSlug;
     });
   }, [slug, blogPosts]);
+
+  // Get related articles (other published posts from same category, excluding current)
+  // MUST be called before any conditional returns to follow Rules of Hooks
+  const relatedArticles = useMemo(() => {
+    if (!blogPost || !blogPost.id || !blogPost.category) return [];
+    try {
+      return blogPosts
+        .filter(post => post.published && post.id !== blogPost.id && post.category === blogPost.category)
+        .slice(0, 3)
+        .map(post => ({
+          image: post.imageUrl || '',
+          title: post.title || '',
+          excerpt: post.excerpt || '',
+          category: post.category || '',
+          date: formatDate(post.date || ''),
+          readTime: calculateReadTime(post.content || ''),
+          slug: generateSlug(post.title || '')
+        }));
+    } catch (error) {
+      console.error('Error generating related articles:', error);
+      return [];
+    }
+  }, [blogPosts, blogPost]);
 
   // Wait for blogPosts to load, then check if post exists
   useEffect(() => {
@@ -128,41 +169,6 @@ export function ArticleDetailPage() {
       </div>
     );
   }
-
-  // Format date
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    } catch {
-      return dateString;
-    }
-  };
-
-  // Calculate read time (rough estimate: 200 words per minute)
-  const calculateReadTime = (content: string | undefined) => {
-    if (!content || content.trim().length === 0) return '1 min read';
-    const words = content.split(/\s+/).filter(w => w.length > 0).length;
-    const minutes = Math.max(1, Math.ceil(words / 200));
-    return `${minutes} min read`;
-  };
-
-  // Get related articles (other published posts from same category, excluding current)
-  const relatedArticles = useMemo(() => {
-    if (!blogPost) return [];
-    return blogPosts
-      .filter(post => post.published && post.id !== blogPost.id && post.category === blogPost.category)
-      .slice(0, 3)
-      .map(post => ({
-        image: post.imageUrl,
-        title: post.title,
-        excerpt: post.excerpt,
-        category: post.category,
-        date: formatDate(post.date),
-        readTime: calculateReadTime(post.content || ''),
-        slug: generateSlug(post.title)
-      }));
-  }, [blogPosts, blogPost]);
 
   const tags = blogPost.tags || [blogPost.category || 'Uncategorized'];
 
