@@ -7,6 +7,8 @@ export interface GalleryImage {
   tags: string[];
   date: string;
   featured: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export const defaultGalleryImages: GalleryImage[] = [

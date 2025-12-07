@@ -26,8 +26,19 @@ export function HomePage() {
   const featuredBlogPosts = publishedBlogPosts.filter(post => post.featured).slice(0, 3);
   const displayBlogPosts = featuredBlogPosts.length > 0 ? featuredBlogPosts : publishedBlogPosts.slice(0, 3);
   
-  const featuredGalleryImages = galleryImages.filter(img => img.featured).slice(0, 8);
-  const displayGalleryImages = featuredGalleryImages.length > 0 ? featuredGalleryImages : galleryImages.slice(0, 8);
+  // Get 5 most recent gallery images (sorted by created_at, then by date)
+  const recentGalleryImages = [...galleryImages]
+    .sort((a, b) => {
+      // Sort by created_at first (most recent first)
+      if (a.created_at && b.created_at) {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+      if (a.created_at) return -1;
+      if (b.created_at) return 1;
+      // Fallback to date if created_at is not available
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    })
+    .slice(0, 5);
   
   const featuredTestimonials = testimonials.filter(t => t.featured);
   const displayTestimonials = featuredTestimonials.length > 0 ? featuredTestimonials : testimonials.slice(0, 3);
@@ -499,39 +510,38 @@ export function HomePage() {
             </p>
           </div>
           
-          {/* Mobile-First Gallery Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 max-w-6xl mx-auto">
-            {/* Large Featured Image - Mobile: spans 2 cols, Desktop: spans 2x2 */}
-            <Link to="/gallery" className="col-span-2 row-span-2 group relative overflow-hidden rounded-xl md:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500">
-              <div className="aspect-square">
-                <ImageWithFallback
-                  src="https://images.unsplash.com/photo-1762006222425-cb6e6b5045f6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb21tdW5pdHklMjBnYXRoZXJpbmclMjBjZWxlYnJhdGlvbnxlbnwxfHx8fDE3NjM4NzcwNzl8MA&ixlib=rb-4.1.0&q=80&w=1080"
-                  alt="CNBL Community Gathering"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-4 md:p-6">
-                  <div>
-                    <p className="text-white font-['Inter'] font-semibold text-sm md:text-base mb-1">CNBL Community</p>
-                    <p className="text-gray-200 text-xs md:text-sm font-['Inter']">Annual Gathering 2024</p>
+          {/* Mobile-First Gallery Grid - Show 5 Most Recent Images */}
+          {recentGalleryImages.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4 max-w-6xl mx-auto">
+              {recentGalleryImages.map((img, idx) => (
+                <Link 
+                  key={img.id} 
+                  to="/gallery" 
+                  className={`group relative overflow-hidden rounded-xl md:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 ${
+                    idx === 0 ? 'col-span-2 row-span-2 md:col-span-2 md:row-span-2 lg:col-span-2 lg:row-span-2' : ''
+                  }`}
+                >
+                  <div className="aspect-square">
+                    <ImageWithFallback
+                      src={img.imageUrl}
+                      alt={img.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-4 md:p-6">
+                      <div>
+                        <p className="text-white font-['Inter'] font-semibold text-sm md:text-base mb-1 line-clamp-2">{img.title}</p>
+                        <p className="text-gray-200 text-xs md:text-sm font-['Inter']">{img.category}</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </Link>
-
-            {/* Small Images */}
-            {displayGalleryImages.slice(0, 6).map((img, idx) => (
-              <Link key={img.id} to="/gallery" className={`group relative overflow-hidden rounded-xl md:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 ${idx >= 4 ? 'hidden md:block' : ''} ${idx >= 5 ? 'hidden lg:block' : ''}`}>
-                <div className="aspect-square">
-                  <ImageWithFallback
-                    src={img.imageUrl}
-                    alt={img.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-500 font-['Inter']">No gallery images available yet.</p>
+            </div>
+          )}
 
           {/* View All Gallery Button */}
           <div className="text-center mt-8 md:mt-12">

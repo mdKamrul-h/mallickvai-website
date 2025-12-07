@@ -12,6 +12,7 @@ export function Header() {
   const location = useLocation();
 
   const navItems = [
+    { path: '/profile', label: 'Profile' },
     { path: '/professional', label: 'Professional' },
     { path: '/experience', label: 'Experience' },
     { path: '/journey', label: 'Journey' },

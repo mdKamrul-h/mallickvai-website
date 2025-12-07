@@ -134,7 +134,7 @@ export async function getGalleryImages(): Promise<GalleryImage[]> {
     const { data, error } = await supabase
       .from(TABLES.GALLERY_IMAGES)
       .select('*')
-      .order('date', { ascending: false });
+      .order('created_at', { ascending: false, nullsFirst: false });
     
     if (error) {
       if (error.code === 'PGRST116' || error.message?.includes('relation') || error.message?.includes('does not exist')) {
@@ -147,10 +147,22 @@ export async function getGalleryImages(): Promise<GalleryImage[]> {
     
     // Map database column names (lowercase) to TypeScript interface (camelCase)
     // PostgreSQL returns column names in lowercase unless quoted
-    return (data || []).map((item: any) => ({
+    const mapped = (data || []).map((item: any) => ({
       ...item,
       imageUrl: item.imageurl || item.imageUrl || '', // Handle both lowercase and camelCase
+      created_at: item.created_at || item.createdAt, // Handle both naming conventions
     }));
+    
+    // If created_at is not available, sort by date as fallback
+    return mapped.sort((a, b) => {
+      if (a.created_at && b.created_at) {
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+      if (a.created_at) return -1;
+      if (b.created_at) return 1;
+      // Fallback to date
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
   } catch (error) {
     console.warn('Exception fetching gallery images:', error);
     return [];
