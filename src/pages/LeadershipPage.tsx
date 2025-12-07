@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Link } from 'react-router-dom';
+import { useContent } from '../contexts/ContentContext';
 
 // Import custom icons
 import {
@@ -19,10 +20,81 @@ import {
 
 export function LeadershipPage() {
   const [isVisible, setIsVisible] = useState(false);
+  const { blogPosts } = useContent();
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
+
+  // Format date helper
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+    } catch {
+      return dateString;
+    }
+  };
+
+  // Calculate read time helper
+  const calculateReadTime = (content: string) => {
+    const words = content.split(/\s+/).length;
+    const minutes = Math.ceil(words / 200);
+    return `${minutes} min read`;
+  };
+
+  // Get leadership insights from blog posts (filtered by Leadership category or related tags)
+  const insights = useMemo(() => {
+    const leadershipPosts = blogPosts
+      .filter(post => 
+        post.published && 
+        (post.category.toLowerCase().includes('leadership') || 
+         post.category.toLowerCase().includes('operations') ||
+         post.tags?.some(tag => 
+           tag.toLowerCase().includes('leadership') || 
+           tag.toLowerCase().includes('operations') ||
+           tag.toLowerCase().includes('rmg')
+         ))
+      )
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 3)
+      .map(post => ({
+        title: post.title,
+        date: formatDate(post.date),
+        readTime: calculateReadTime(post.content),
+        category: post.category,
+        slug: post.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+      }));
+
+    // Fallback to default insights if no blog posts found
+    if (leadershipPosts.length === 0) {
+      return [
+        {
+          title: 'The Future of RMG in Bangladesh: Opportunities & Challenges',
+          date: 'November 2024',
+          readTime: '5 min read',
+          category: 'Industry Trends',
+          slug: ''
+        },
+        {
+          title: 'Lean Manufacturing: Lessons from 25 Years in Operations',
+          date: 'October 2024',
+          readTime: '7 min read',
+          category: 'Operations',
+          slug: ''
+        },
+        {
+          title: 'Building High-Performance Teams in Manufacturing',
+          date: 'September 2024',
+          readTime: '6 min read',
+          category: 'Leadership',
+          slug: ''
+        }
+      ];
+    }
+
+    return leadershipPosts;
+  }, [blogPosts]);
 
   const domains = [
     {
@@ -84,27 +156,6 @@ export function LeadershipPage() {
     { label: 'STRATEGIZE', description: 'Solution design' },
     { label: 'IMPLEMENT', description: 'Execution excellence' },
     { label: 'MONITOR', description: 'Continuous optimization' }
-  ];
-
-  const insights = [
-    {
-      title: 'The Future of RMG in Bangladesh: Opportunities & Challenges',
-      date: 'November 2024',
-      readTime: '5 min read',
-      category: 'Industry Trends'
-    },
-    {
-      title: 'Lean Manufacturing: Lessons from 25 Years in Operations',
-      date: 'October 2024',
-      readTime: '7 min read',
-      category: 'Operations'
-    },
-    {
-      title: 'Building High-Performance Teams in Manufacturing',
-      date: 'September 2024',
-      readTime: '6 min read',
-      category: 'Leadership'
-    }
   ];
 
   return (
@@ -599,9 +650,17 @@ export function LeadershipPage() {
                         </div>
                       </div>
                     </div>
-                    <Button className="bg-gradient-to-r from-[#C9A961] to-[#B76E79] text-white hover:shadow-lg transition-all duration-300 hover:scale-105 px-6 py-6 rounded-xl font-['Inter'] font-semibold w-full md:w-auto">
-                      Read Article
-                    </Button>
+                    {insight.slug ? (
+                      <Link to={`/blog/${insight.slug}`}>
+                        <Button className="bg-gradient-to-r from-[#C9A961] to-[#B76E79] text-white hover:shadow-lg transition-all duration-300 hover:scale-105 px-6 py-6 rounded-xl font-['Inter'] font-semibold w-full md:w-auto">
+                          Read Article
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Button className="bg-gradient-to-r from-[#C9A961] to-[#B76E79] text-white hover:shadow-lg transition-all duration-300 hover:scale-105 px-6 py-6 rounded-xl font-['Inter'] font-semibold w-full md:w-auto">
+                        Read Article
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -609,9 +668,11 @@ export function LeadershipPage() {
           </div>
           
           <div className="text-center mt-8 md:mt-12">
-            <Button variant="outline" className="border-[#C9A961] text-[#0A1929] hover:bg-[#C9A961]/5 px-8 py-6 rounded-xl font-['Inter'] font-semibold">
-              View All Insights
-            </Button>
+            <Link to="/blog">
+              <Button variant="outline" className="border-[#C9A961] text-[#0A1929] hover:bg-[#C9A961]/5 px-8 py-6 rounded-xl font-['Inter'] font-semibold">
+                View All Insights
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
