@@ -432,33 +432,43 @@ export function HomePage() {
           </div>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
-            {displayBlogPosts.map((blog) => (
-              <Card key={blog.id} className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white">
-                <div className="relative aspect-video overflow-hidden">
-                  <ImageWithFallback
-                    src={blog.imageUrl}
-                    alt={blog.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                  
-                  {/* Category Badge */}
-                  <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-['Inter'] font-semibold text-white shadow-lg" style={{
-                    background: 'linear-gradient(135deg, #C9A961 0%, #B76E79 100%)'
-                  }}>
-                    {blog.category}
-                  </div>
-                </div>
-                
-                <CardContent className="p-6">
-                  <h3 className="mb-3 text-[#0A1929] group-hover:text-[#C9A961] transition-colors">{blog.title}</h3>
-                  <p className="text-gray-600 mb-4 font-['Inter'] leading-relaxed">{blog.excerpt}</p>
-                  <Link to="/blog" className="inline-flex items-center text-[#C9A961] hover:text-[#B76E79] font-['Inter'] font-semibold transition-all group-hover:gap-3 gap-2">
-                    Read More <ArrowRight className="h-4 w-4 transition-all" />
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
+            {displayBlogPosts.map((blog) => {
+              // Generate slug from title
+              const slug = blog.title
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/(^-|-$)/g, '');
+              
+              return (
+                <Link key={blog.id} to={`/blog/${slug}`} className="block">
+                  <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 bg-white cursor-pointer h-full">
+                    <div className="relative aspect-video overflow-hidden">
+                      <ImageWithFallback
+                        src={blog.imageUrl}
+                        alt={blog.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      
+                      {/* Category Badge */}
+                      <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full text-xs font-['Inter'] font-semibold text-white shadow-lg" style={{
+                        background: 'linear-gradient(135deg, #C9A961 0%, #B76E79 100%)'
+                      }}>
+                        {blog.category}
+                      </div>
+                    </div>
+                    
+                    <CardContent className="p-6">
+                      <h3 className="mb-3 text-[#0A1929] group-hover:text-[#C9A961] transition-colors">{blog.title}</h3>
+                      <p className="text-gray-600 mb-4 font-['Inter'] leading-relaxed">{blog.excerpt}</p>
+                      <div className="inline-flex items-center text-[#C9A961] hover:text-[#B76E79] font-['Inter'] font-semibold transition-all group-hover:gap-3 gap-2">
+                        Read More <ArrowRight className="h-4 w-4 transition-all" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
 
           {/* View All Button */}

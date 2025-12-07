@@ -41,3 +41,5 @@ WHERE table_name = 'gallery_images' AND column_name = 'imageUrl';
 
 
 
+
+
