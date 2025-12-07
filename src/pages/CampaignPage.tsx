@@ -127,6 +127,119 @@ export function CampaignPage({ isModal = false, onClose }: CampaignPageProps) {
         </div>
       </section>
 
+      {/* ELECTION INFORMATION SECTION */}
+      <section className="py-12 md:py-16 bg-gradient-to-br from-[#0A1A3A] via-[#15294A] to-[#0A1A3A] relative overflow-hidden">
+        {/* Decorative Background Elements */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#C62828] rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#C62828] rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="max-w-5xl mx-auto">
+            <div className="bg-gradient-to-br from-white/15 via-white/10 to-white/5 backdrop-blur-md border-2 border-white/20 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+              {/* Animated border gradient */}
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-[#C62828] via-[#C62828]/50 to-[#C62828] opacity-20 animate-pulse"></div>
+              
+              {/* Corner accents */}
+              <div className="absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 border-[#C62828] rounded-tl-3xl"></div>
+              <div className="absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 border-[#C62828] rounded-br-3xl"></div>
+              
+              <div className="relative z-10">
+                {/* Main Heading */}
+                <div className="text-center mb-8">
+                  <h2 className="text-white font-['Montserrat'] font-bold text-3xl md:text-4xl lg:text-5xl mb-4">
+                    Vote for Mallick Nazrul
+                  </h2>
+                  <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-[#C62828]/30 backdrop-blur-sm border-2 border-[#C62828]/50">
+                    <span className="text-[#C62828] font-['Montserrat'] font-bold text-xl md:text-2xl">
+                      Ballot No 07
+                    </span>
+                  </div>
+                </div>
+
+                {/* Election Details Grid */}
+                <div className="grid md:grid-cols-2 gap-6 md:gap-8 mt-10">
+                  {/* Left Column */}
+                  <div className="space-y-6">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#C62828] to-[#A52020] flex items-center justify-center flex-shrink-0">
+                          <Award className="w-6 h-6 text-white" />
+                        </div>
+                        <h3 className="text-white font-['Montserrat'] font-semibold text-lg md:text-xl">
+                          Executive Committee Election 2025
+                        </h3>
+                      </div>
+                      <p className="text-gray-200 font-['Inter'] text-sm md:text-base">
+                        CNBL Executive Committee Election
+                      </p>
+                    </div>
+
+                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#C62828] to-[#A52020] flex items-center justify-center flex-shrink-0">
+                          <Users className="w-6 h-6 text-white" />
+                        </div>
+                        <h3 className="text-white font-['Montserrat'] font-semibold text-lg md:text-xl">
+                          Candidate Details
+                        </h3>
+                      </div>
+                      <div className="space-y-2 text-gray-200 font-['Inter']">
+                        <p className="text-base md:text-lg">
+                          <span className="text-[#C62828] font-semibold">NDC 1999</span> • <span className="text-[#C62828] font-semibold">LM 0202</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column */}
+                  <div className="space-y-6">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#C62828] to-[#A52020] flex items-center justify-center flex-shrink-0">
+                          <Calendar className="w-6 h-6 text-white" />
+                        </div>
+                        <h3 className="text-white font-['Montserrat'] font-semibold text-lg md:text-xl">
+                          Election Date
+                        </h3>
+                      </div>
+                      <p className="text-[#C62828] font-['Montserrat'] font-bold text-2xl md:text-3xl">
+                        20 Dec 2025
+                      </p>
+                    </div>
+
+                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#C62828] to-[#A52020] flex items-center justify-center flex-shrink-0">
+                          <Shield className="w-6 h-6 text-white" />
+                        </div>
+                        <h3 className="text-white font-['Montserrat'] font-semibold text-lg md:text-xl">
+                          Election Booth
+                        </h3>
+                      </div>
+                      <p className="text-gray-200 font-['Inter'] text-base md:text-lg font-semibold">
+                        CNBL Premise
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Call to Action */}
+                <div className="mt-10 text-center">
+                  <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#C62828]/20 backdrop-blur-sm border-2 border-[#C62828]/50">
+                    <CheckCircle className="w-5 h-5 text-[#C62828]" />
+                    <span className="text-white font-['Inter'] font-semibold text-sm md:text-base">
+                      Your Vote Matters • Make Your Voice Heard
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ABOUT SECTION */}
       <section className="py-20 bg-[#F2F2F2]">
         <div className="container mx-auto px-4">
