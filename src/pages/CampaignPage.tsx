@@ -72,7 +72,7 @@ export function CampaignPage({ isModal = false, onClose }: CampaignPageProps) {
                   MALLICK NAZRUL ISLAM
                 </div>
                 <div className="font-['Inter'] text-lg text-[#C62828] font-semibold">
-                  LM 0202 • NDC 1999
+                  LM 0202 • NDC 1999 • BALLOT 7
                 </div>
               </div>
               
