@@ -1,19 +1,18 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { Calendar, Eye, Clock, Facebook, Twitter, Linkedin, Mail, ThumbsUp } from 'lucide-react';
+import { Calendar, Eye, Clock, Facebook, Twitter, Linkedin, Mail } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { Textarea } from '../components/ui/textarea';
 import { useContent } from '../contexts/ContentContext';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import profileImage from 'figma:asset/6c38df665b9ba66e3ca1a3cf119acaae7dc96636.png';
 
 export function ArticleDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { blogPosts } = useContent();
-  const [comment, setComment] = useState('');
-  const [activeSection, setActiveSection] = useState('introduction');
 
   // Find blog post by slug
   const blogPost = useMemo(() => {
@@ -81,30 +80,6 @@ export function ArticleDetailPage() {
   }, [blogPosts, blogPost]);
 
   const tags = blogPost.tags || [blogPost.category];
-
-  const comments = [
-    {
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=48&h=48&fit=crop',
-      name: 'John Doe',
-      date: 'Nov 21, 2024',
-      text: 'Excellent insights! The perspective on automation integration is particularly valuable...',
-      likes: 5
-    },
-    {
-      avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=48&h=48&fit=crop',
-      name: 'Sarah Ahmed',
-      date: 'Nov 21, 2024',
-      text: 'As someone working in the RMG sector, I find these observations very relevant to our current challenges.',
-      likes: 3
-    }
-  ];
-
-
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Comment:', comment);
-    setComment('');
-  };
 
   return (
     <div className="bg-white">
@@ -212,7 +187,7 @@ export function ArticleDetailPage() {
           {/* Main Content - 70% */}
           <article className="flex-[0_0_100%] lg:flex-[0_0_70%] max-w-[750px]">
             <div 
-              className="prose prose-lg max-w-none"
+              className="prose prose-lg max-w-none markdown-content"
               style={{
                 fontFamily: 'Open Sans, sans-serif',
                 fontSize: '18px',
@@ -220,66 +195,226 @@ export function ArticleDetailPage() {
                 lineHeight: '1.9'
               }}
             >
-              {blogPost.content.split('\n\n').map((paragraph, idx) => {
-                // Check if paragraph is a heading (starts with ##)
-                if (paragraph.trim().startsWith('##')) {
-                  const text = paragraph.replace(/^##+\s*/, '');
-                  const level = paragraph.match(/^##+/)?.[0].length || 2;
-                  const HeadingTag = `h${Math.min(level, 6)}` as keyof JSX.IntrinsicElements;
-                  return (
-                    <HeadingTag
-                      key={idx}
-                      style={{
-                        fontFamily: 'Montserrat, sans-serif',
-                        fontWeight: 'bold',
-                        fontSize: level === 2 ? '32px' : level === 3 ? '24px' : '20px',
-                        color: '#003366',
-                        lineHeight: '1.3',
-                        margin: '60px 0 24px',
-                        borderLeft: level === 2 ? '6px solid #D4AF37' : 'none',
-                        paddingLeft: level === 2 ? '24px' : '0'
-                      }}
-                    >
-                      {text}
-                    </HeadingTag>
-                  );
-                }
-                // Check if paragraph is a list item
-                if (paragraph.trim().startsWith('- ') || paragraph.trim().startsWith('* ')) {
-                  const items = paragraph.split('\n').filter(line => line.trim().startsWith('- ') || line.trim().startsWith('* '));
-                  return (
-                    <ul key={idx} style={{
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  // Custom styling for headings
+                  h1: ({node, ...props}) => (
+                    <h1 style={{
+                      fontFamily: 'Montserrat, sans-serif',
+                      fontWeight: 'bold',
+                      fontSize: '36px',
+                      color: '#003366',
+                      lineHeight: '1.3',
+                      margin: '60px 0 24px',
+                      borderLeft: '6px solid #D4AF37',
+                      paddingLeft: '24px'
+                    }} {...props} />
+                  ),
+                  h2: ({node, ...props}) => (
+                    <h2 style={{
+                      fontFamily: 'Montserrat, sans-serif',
+                      fontWeight: 'bold',
+                      fontSize: '32px',
+                      color: '#003366',
+                      lineHeight: '1.3',
+                      margin: '60px 0 24px',
+                      borderLeft: '6px solid #D4AF37',
+                      paddingLeft: '24px'
+                    }} {...props} />
+                  ),
+                  h3: ({node, ...props}) => (
+                    <h3 style={{
+                      fontFamily: 'Montserrat, sans-serif',
+                      fontWeight: 'bold',
+                      fontSize: '24px',
+                      color: '#003366',
+                      lineHeight: '1.3',
+                      margin: '40px 0 16px'
+                    }} {...props} />
+                  ),
+                  h4: ({node, ...props}) => (
+                    <h4 style={{
+                      fontFamily: 'Montserrat, sans-serif',
+                      fontWeight: '600',
+                      fontSize: '20px',
+                      color: '#003366',
+                      lineHeight: '1.3',
+                      margin: '32px 0 12px'
+                    }} {...props} />
+                  ),
+                  // Custom styling for paragraphs
+                  p: ({node, ...props}) => (
+                    <p style={{
+                      fontFamily: 'Open Sans, sans-serif',
+                      fontSize: '18px',
+                      color: '#333333',
+                      lineHeight: '1.9',
+                      marginBottom: '28px'
+                    }} {...props} />
+                  ),
+                  // Custom styling for lists
+                  ul: ({node, ...props}) => (
+                    <ul style={{
+                      fontFamily: 'Open Sans, sans-serif',
+                      fontSize: '18px',
+                      color: '#444444',
+                      lineHeight: '1.9',
+                      margin: '24px 0',
+                      marginLeft: '32px',
+                      listStyleType: 'disc'
+                    }} {...props} />
+                  ),
+                  ol: ({node, ...props}) => (
+                    <ol style={{
                       fontFamily: 'Open Sans, sans-serif',
                       fontSize: '18px',
                       color: '#444444',
                       lineHeight: '1.9',
                       margin: '24px 0',
                       marginLeft: '32px'
-                    }}>
-                      {items.map((item, itemIdx) => (
-                        <li key={itemIdx} style={{ marginBottom: '12px' }}>
-                          {item.replace(/^[-*]\s+/, '')}
-                        </li>
-                      ))}
-                    </ul>
-                  );
-                }
-                // Regular paragraph
-                if (paragraph.trim()) {
-                  return (
-                    <p key={idx} style={{
-                      fontFamily: 'Open Sans, sans-serif',
-                      fontSize: '18px',
-                      color: '#333333',
-                      lineHeight: '1.9',
-                      marginBottom: '28px'
-                    }}>
-                      {paragraph.trim()}
-                    </p>
-                  );
-                }
-                return null;
-              })}
+                    }} {...props} />
+                  ),
+                  li: ({node, ...props}) => (
+                    <li style={{
+                      marginBottom: '12px',
+                      paddingLeft: '8px'
+                    }} {...props} />
+                  ),
+                  // Custom styling for blockquotes
+                  blockquote: ({node, ...props}) => (
+                    <blockquote style={{
+                      padding: '32px 40px',
+                      background: '#F5F5F5',
+                      borderLeft: '6px solid #D4AF37',
+                      fontFamily: 'Playfair Display, serif',
+                      fontStyle: 'italic',
+                      fontSize: '22px',
+                      color: '#003366',
+                      lineHeight: '1.7',
+                      margin: '40px 0',
+                      borderRadius: '8px'
+                    }} {...props} />
+                  ),
+                  // Custom styling for code blocks
+                  code: ({node, inline, className, ...props}: any) => {
+                    if (inline) {
+                      return (
+                        <code style={{
+                          background: 'rgba(0,51,102,0.1)',
+                          color: '#003366',
+                          padding: '3px 8px',
+                          borderRadius: '4px',
+                          fontFamily: 'Courier New, monospace',
+                          fontSize: '15px'
+                        }} {...props} />
+                      );
+                    }
+                    return (
+                      <code className={className} style={{
+                        background: '#F5F5F5',
+                        padding: '3px 8px',
+                        borderRadius: '4px',
+                        fontFamily: 'Courier New, monospace',
+                        fontSize: '15px'
+                      }} {...props} />
+                    );
+                  },
+                  pre: ({node, ...props}: any) => (
+                    <pre style={{
+                      background: '#F5F5F5',
+                      padding: '20px',
+                      borderRadius: '8px',
+                      fontFamily: 'Courier New, monospace',
+                      fontSize: '15px',
+                      overflowX: 'auto',
+                      margin: '24px 0',
+                      border: '1px solid #E0E0E0'
+                    }} {...props} />
+                  ),
+                  // Custom styling for links
+                  a: ({node, ...props}: any) => (
+                    <a style={{
+                      color: '#C9A961',
+                      textDecoration: 'underline',
+                      fontWeight: '600'
+                    }} {...props} />
+                  ),
+                  // Custom styling for strong/bold
+                  strong: ({node, ...props}) => (
+                    <strong style={{
+                      fontWeight: '700',
+                      color: '#003366'
+                    }} {...props} />
+                  ),
+                  // Custom styling for emphasis/italic
+                  em: ({node, ...props}) => (
+                    <em style={{
+                      fontStyle: 'italic',
+                      color: '#555555'
+                    }} {...props} />
+                  ),
+                  // Custom styling for horizontal rules
+                  hr: ({node, ...props}) => (
+                    <hr style={{
+                      border: 'none',
+                      borderTop: '2px solid #E0E0E0',
+                      margin: '40px 0'
+                    }} {...props} />
+                  ),
+                  // Custom styling for images
+                  img: ({node, ...props}: any) => (
+                    <img style={{
+                      maxWidth: '100%',
+                      height: 'auto',
+                      borderRadius: '8px',
+                      margin: '24px 0',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                    }} {...props} />
+                  ),
+                  // Custom styling for tables (from remark-gfm)
+                  table: ({node, ...props}: any) => (
+                    <div style={{ overflowX: 'auto', margin: '24px 0' }}>
+                      <table style={{
+                        width: '100%',
+                        borderCollapse: 'collapse',
+                        fontFamily: 'Open Sans, sans-serif',
+                        fontSize: '16px'
+                      }} {...props} />
+                    </div>
+                  ),
+                  thead: ({node, ...props}: any) => (
+                    <thead style={{
+                      background: '#F5F5F5',
+                      borderBottom: '2px solid #E0E0E0'
+                    }} {...props} />
+                  ),
+                  th: ({node, ...props}: any) => (
+                    <th style={{
+                      padding: '12px',
+                      textAlign: 'left',
+                      fontWeight: '600',
+                      color: '#003366',
+                      borderBottom: '1px solid #E0E0E0'
+                    }} {...props} />
+                  ),
+                  td: ({node, ...props}: any) => (
+                    <td style={{
+                      padding: '12px',
+                      borderBottom: '1px solid #E0E0E0'
+                    }} {...props} />
+                  ),
+                  tr: ({node, ...props}: any) => (
+                    <tr style={{
+                      '&:hover': {
+                        background: '#F9F9F9'
+                      }
+                    }} {...props} />
+                  )
+                }}
+              >
+                {blogPost.content}
+              </ReactMarkdown>
             </div>
           </article>
 

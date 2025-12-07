@@ -319,14 +319,30 @@ export function AdminBlog() {
 
                 <div>
                   <label className="block text-sm font-['Inter'] font-medium text-gray-700 mb-2">
-                    Content *
+                    Content * (Markdown supported)
                   </label>
+                  <div className="mb-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-xs text-blue-800 font-['Inter'] mb-2">
+                      <strong>Markdown Guide:</strong> Use markdown syntax for formatting:
+                    </p>
+                    <ul className="text-xs text-blue-700 font-['Inter'] list-disc list-inside space-y-1">
+                      <li><code>## Heading</code> for headings</li>
+                      <li><code>- Item</code> or <code>* Item</code> for bullet lists</li>
+                      <li><code>1. Item</code> for numbered lists</li>
+                      <li><code>**bold**</code> for <strong>bold text</strong></li>
+                      <li><code>*italic*</code> for <em>italic text</em></li>
+                      <li><code>`code`</code> for inline code</li>
+                      <li><code>&gt; quote</code> for blockquotes</li>
+                      <li><code>[link](url)</code> for links</li>
+                    </ul>
+                  </div>
                   <textarea
                     name="content"
                     required
-                    rows={8}
+                    rows={12}
                     defaultValue={editingPost?.content}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg font-['Inter'] focus:outline-none focus:ring-2 focus:ring-[#C9A961]"
+                    placeholder="Write your blog content using Markdown syntax..."
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg font-['Inter'] focus:outline-none focus:ring-2 focus:ring-[#C9A961] font-mono text-sm"
                   />
                 </div>
 
